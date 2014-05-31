@@ -7,7 +7,7 @@ module Savage
   class SubPath
     def to_command
       @directions.to_enum(:each_with_index).collect { |dir, i|
-        command_string = dir.to_command      
+        command_string = ' ' + dir.to_command
       }.join
     end
   end
@@ -19,7 +19,7 @@ class SVGFile
   def initialize(file_name)
     @allowed_elements = ['path']
     @paths = []
-    @whole_path = []
+    @whole_path = Savage::Path.new
     @elements = []
     @properties = {}
     read_svg file_name
@@ -45,15 +45,21 @@ class SVGFile
   def read_whole_path
     @paths.each do |path|
       path.subpaths.each do |subpath|
-        subpath.directions.each do |direction|
-          @whole_path.push direction
+        subpath.directions.each_with_index do |direction, i|
+          @whole_path.subpaths[0].directions << direction
+          p [@whole_path.directions.size, i]
         end
       end
     end
+    @whole_path.close_path
   end
   def save(file_name, paths)
+
     output_file = SVG.new(@width, @height)
-    paths.each { |path| output_file.svg << output_file.path(path.to_command) }
+    paths.each_with_index do |path, i| 
+      output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 3")
+          p path.subpaths[0].directions.first.class
+    end
     output_file.save(file_name)
   end
 end
@@ -64,6 +70,6 @@ svg_file = SVGFile.new file_name
 paths = svg_file.paths
 
 
-svg_file.save 'output.svg', svg_file.paths
+svg_file.save 'output.svg', paths#[svg_file.whole_path]
 # p svg_file.properties
 # p svg_file.paths[3].to_command

@@ -153,227 +153,227 @@ XML::Node 2 defs
   def textPath(path, str, style = '')
     path = (path.is_a? XML::Node) ? path['id'] : path.to_s
     XML::Node.new('text') << XML::Node.new('textPath').set_text(str) * ['xlink:href', '#'+path, :style, style]
-  end
-  #<tref>
-  def tref(text)
-    XML::Node.new('tref') * ['xlink:href', '#'+text['id']]
-  end
+                         end
+                         #<tref>
+                         def tref(text)
+                           XML::Node.new('tref') * ['xlink:href', '#'+text['id']]
+                         end
 
-  #<set>
-  def set(attribute, attributeType, to, beg = '0s')
-    XML::Node.new('set') * [:attributeName, attribute, :attributeType, attributeType, :to, to, :begin, beg]
-  end
-  #<animate>
-  def animate(attribute, attributeType, from, to, beg, dur, fill = 'freeze')
-    XML::Node.new('animate') * [:attributeName, attribute, :attributeType, attributeType, :from, from, :to, to, :begin, beg, :dur, dur, :fill, fill]
-  end
-  #<animateMotion>
-  def animateMotion(path, beg, dur, fill = 'freeze')
-    XML::Node.new('animateMotion') * [:begin, beg, :dur, dur, :path, path, :fill, fill]
-  end
-  #<mpath>
-  def mpath(path)
-    XML::Node.new('mpath') * ['xlink:href', '#'+path['id']]
-  end
-  #<animateColor>
-  def animateColor(attribute, attributeType, from, to, beg, dur, fill = 'freeze')
-    XML::Node.new('animateColor') * [:attributeName, attribute, :attributeType, attributeType, :from, from, :to, to, :begin, beg, :dur, dur, :fill, fill]
-  end
-  #<animateTransform>
-  def animateTransform(type, from, to, beg, dur, fill = 'freeze')
-    XML::Node.new('animateTransform') * [:attributeName, 'transform', :attributeType, 'XML', :type, type, :from, from, :to, to, :begin, beg, :dur, dur, :fill, fill]
-  end
+                         #<set>
+                         def set(attribute, attributeType, to, beg = '0s')
+                           XML::Node.new('set') * [:attributeName, attribute, :attributeType, attributeType, :to, to, :begin, beg]
+                         end
+                         #<animate>
+                         def animate(attribute, attributeType, from, to, beg, dur, fill = 'freeze')
+                           XML::Node.new('animate') * [:attributeName, attribute, :attributeType, attributeType, :from, from, :to, to, :begin, beg, :dur, dur, :fill, fill]
+                         end
+                         #<animateMotion>
+                         def animateMotion(path, beg, dur, fill = 'freeze')
+                           XML::Node.new('animateMotion') * [:begin, beg, :dur, dur, :path, path, :fill, fill]
+                         end
+                         #<mpath>
+                         def mpath(path)
+                           XML::Node.new('mpath') * ['xlink:href', '#'+path['id']]
+                         end
+                         #<animateColor>
+                         def animateColor(attribute, attributeType, from, to, beg, dur, fill = 'freeze')
+                           XML::Node.new('animateColor') * [:attributeName, attribute, :attributeType, attributeType, :from, from, :to, to, :begin, beg, :dur, dur, :fill, fill]
+                         end
+                         #<animateTransform>
+                         def animateTransform(type, from, to, beg, dur, fill = 'freeze')
+                           XML::Node.new('animateTransform') * [:attributeName, 'transform', :attributeType, 'XML', :type, type, :from, from, :to, to, :begin, beg, :dur, dur, :fill, fill]
+                         end
 
-  #Special shapes
-  def radius(p, length, number, angle, start_angle = 0, offset = 0, style = '')
-    xml = []
-    0.upto(number-1) { |r|
-      xml << line(Point.new(p.x + offset*Math.cos((start_angle+angle*r)/180.0*Math::PI),
+                         #Special shapes
+                         def radius(p, length, number, angle, start_angle = 0, offset = 0, style = '')
+                           xml = []
+                           0.upto(number-1) { |r|
+                             xml << line(Point.new(p.x + offset*Math.cos((start_angle+angle*r)/180.0*Math::PI),
       p.y - offset*Math.sin((start_angle+angle*r)/180.0*Math::PI)),
-      Point.new(p.x + (length+offset)*Math.cos((start_angle+angle*r)/180.0*Math::PI),
+                                         Point.new(p.x + (length+offset)*Math.cos((start_angle+angle*r)/180.0*Math::PI),
       p.y - (length+offset)*Math.sin((start_angle+angle*r)/180.0*Math::PI)), style)
-    }
-    xml
-  end
+                           }
+                           xml
+                         end
 
-  def arc(a, b, rx, ry, arc_flag = 0, sweep_flag = 0, style = '')
-    XML::Node.new('path') * [:d, "M#{a} A#{rx},#{ry} 0 #{arc_flag},#{sweep_flag} #{b}", :style, style]
-  end
+                         def arc(a, b, rx, ry, arc_flag = 0, sweep_flag = 0, style = '')
+                           XML::Node.new('path') * [:d, "M#{a} A#{rx},#{ry} 0 #{arc_flag},#{sweep_flag} #{b}", :style, style]
+                         end
 
-  def relarc(a, b, rx, ry, arc_flag = 0, sweep_flag = 0, style = '')
-    XML::Node.new('path') * [:d, "M#{a} a#{rx},#{ry} 0 #{arc_flag},#{sweep_flag} #{b}", :style, style]
-  end
+                         def relarc(a, b, rx, ry, arc_flag = 0, sweep_flag = 0, style = '')
+                           XML::Node.new('path') * [:d, "M#{a} a#{rx},#{ry} 0 #{arc_flag},#{sweep_flag} #{b}", :style, style]
+                         end
 
-  def circle_arc(p, r, a_start, a_end, sweep_flag = true, style = '')
-    arc_flag = 0
-    s = Point.new(p.x+r*Math.cos(a_start/180.0*Math::PI), p.y-r*Math.sin(a_start/180.0*Math::PI))
-    e = Point.new(p.x+r*Math.cos(a_end/180.0*Math::PI), p.y-r*Math.sin(a_end/180.0*Math::PI))
-    sweep_flag = ((a_end-a_start)%360 > 180) ? 0 : 1 if(sweep_flag == true)
-    arc(s, e, r, r, a_start, a_end, arc_flag, sweep_flag, style)
-  end
+                         def circle_arc(p, r, a_start, a_end, sweep_flag = true, style = '')
+                           arc_flag = 0
+                           s = Point.new(p.x+r*Math.cos(a_start/180.0*Math::PI), p.y-r*Math.sin(a_start/180.0*Math::PI))
+                           e = Point.new(p.x+r*Math.cos(a_end/180.0*Math::PI), p.y-r*Math.sin(a_end/180.0*Math::PI))
+                           sweep_flag = ((a_end-a_start)%360 > 180) ? 0 : 1 if(sweep_flag == true)
+                           arc(s, e, r, r, a_start, a_end, arc_flag, sweep_flag, style)
+                         end
 
-  def text_aligned(center, str, font_size, style = '')
-    cor = font_size/6
-    text(str, center.add_y(font_size/2.8+cor), "text-anchor: middle; font-size: #{font_size}px;#{style}")
-  end
+                         def text_aligned(center, str, font_size, style = '')
+                           cor = font_size/6
+                           text(str, center.add_y(font_size/2.8+cor), "text-anchor: middle; font-size: #{font_size}px;#{style}")
+                         end
 
-  def rotated_text_aligned(center, str, font_size, angle = 0, text_look_up = false, style = '')
-    angle += (angle == 180) ? -180 : 180 if(text_look_up && angle%360 > 90 && angle%360 < 270)
-    cor = font_size/6
-    text(str, center.add_y(font_size/2.8+cor), "text-anchor: middle font-size: #{font_size}px;#{style}") * [:transform, "rotate(#{-angle%360},#{center.add_y(cor)})"]
-  end
+                         def rotated_text_aligned(center, str, font_size, angle = 0, text_look_up = false, style = '')
+                           angle += (angle == 180) ? -180 : 180 if(text_look_up && angle%360 > 90 && angle%360 < 270)
+                           cor = font_size/6
+                           text(str, center.add_y(font_size/2.8+cor), "text-anchor: middle font-size: #{font_size}px;#{style}") * [:transform, "rotate(#{-angle%360},#{center.add_y(cor)})"]
+                         end
 
-  def eStar(center, n, r, style = '')
-    #empty star, minimum 3 points
-    #5:2*72, 6:2*60, 7:3*~51, 8:3*45, 9:4*40, 10:4*36
-    step = (n-2+n%2)/2
+                         def eStar(center, n, r, style = '')
+                           #empty star, minimum 3 points
+                           #5:2*72, 6:2*60, 7:3*~51, 8:3*45, 9:4*40, 10:4*36
+                           step = (n-2+n%2)/2
     angle = 2*Math::PI/n
-    offset = Math::PI/2 #top point
-    points = []
-    d = ''
-    n.times { |p|
-      points << Point.new(Math.cos(p*angle+offset)*r, -Math.sin(p*angle+offset)*r)
-    }
-    d = ''
-    (n).times { |p|
-      d += "M#{center+points[p]} L#{center+points[(p+step)%n]} "
-    }
-    path(d.rstrip, style)
-  end
+                           offset = Math::PI/2 #top point
+                           points = []
+                           d = ''
+                           n.times { |p|
+                             points << Point.new(Math.cos(p*angle+offset)*r, -Math.sin(p*angle+offset)*r)
+                           }
+                           d = ''
+                           (n).times { |p|
+                             d += "M#{center+points[p]} L#{center+points[(p+step)%n]} "
+                           }
+                           path(d.rstrip, style)
+                         end
 
-  def fStar(center, n, r_int, r_ext, style = '')
-    #filled star, minimum 3 points
-    angle = 2*Math::PI/n
-    offset = Math::PI/2#top point
-    points_ext, points_int = [], []
-    for p in (0...n)
-      points_ext << Point.new( Math.cos(p*angle+offset)*r_ext, -Math.sin(p*angle+offset)*r_ext )
-      points_int << Point.new( Math.cos((p+0.5)*angle+offset)*r_int, -Math.sin((p+0.5)*angle+offset)*r_int )
-    end
-    d = "M#{center+points_ext[0]}"
-    for i in (0...n-1)
-      d += " L#{center+points_int[i]} L#{center+points_ext[i+1]}"
-    end
-    d += "L#{center+points_int[n-1]} z"
-    path(d, style)
-  end
-end
+                         def fStar(center, n, r_int, r_ext, style = '')
+                           #filled star, minimum 3 points
+                           angle = 2*Math::PI/n
+                           offset = Math::PI/2#top point
+                           points_ext, points_int = [], []
+                           for p in (0...n)
+                             points_ext << Point.new( Math.cos(p*angle+offset)*r_ext, -Math.sin(p*angle+offset)*r_ext )
+                             points_int << Point.new( Math.cos((p+0.5)*angle+offset)*r_int, -Math.sin((p+0.5)*angle+offset)*r_int )
+                           end
+                           d = "M#{center+points_ext[0]}"
+                           for i in (0...n-1)
+                             d += " L#{center+points_int[i]} L#{center+points_ext[i+1]}"
+                           end
+                           d += "L#{center+points_int[n-1]} z"
+                           path(d, style)
+                         end
+                         end
 
-#<path>
-class SVGPath
-  def initialize
-    @arr = []
-  end
-  def add(str)
-    @arr << str
-    self
-  end
-  alias :<< :add
+                         #<path>
+                         class SVGPath
+                           def initialize
+                             @arr = []
+                           end
+                           def add(str)
+                             @arr << str
+                             self
+                           end
+                           alias :<< :add
 
-  def m(p)
-    add "m#{p}"
-  end
-  def M(p)
-    add "M#{p}"
-  end
+                           def m(p)
+                             add "m#{p}"
+                           end
+                           def M(p)
+                             add "M#{p}"
+                           end
 
-  def z
-    add "z"
-  end
+                           def z
+                             add "z"
+                           end
 
-  def l(*p) add "l#{p.join(' ')}"; end
-  def L(*p) add "L#{p.join(' ')}"; end
-  def h(x) add "h#{x}"; end
-  def H(x) add "H#{x}"; end
-  def v(y) add "v#{y}"; end
-  def V(y) add "V#{y}"; end
+                           def l(*p) add "l#{p.join(' ')}"; end
+                           def L(*p) add "L#{p.join(' ')}"; end
+                           def h(x) add "h#{x}"; end
+                           def H(x) add "H#{x}"; end
+                           def v(y) add "v#{y}"; end
+                           def V(y) add "V#{y}"; end
 
-  def q(c, e) add "q#{c} #{e}"; end
-  def Q(c, e) add "Q#{c} #{e}"; end
-  def t(p) add "t#{p}"; end
+                           def q(c, e) add "q#{c} #{e}"; end
+                           def Q(c, e) add "Q#{c} #{e}"; end
+                           def t(p) add "t#{p}"; end
 
-  def c(cb, ce, e)
-    add "c#{cb} #{ce} #{e}"
-  end
-  def s(ce, e)
-    add "s#{ce} #{e}"
-  end
+                           def c(cb, ce, e)
+                             add "c#{cb} #{ce} #{e}"
+                           end
+                           def s(ce, e)
+                             add "s#{ce} #{e}"
+                           end
 
-  def a(p, rotate, large_angle_flag, sweep_flag, e)
-    add "a#{p} #{rotate} #{large_angle_flag},#{sweep_flag} #{e}"
-  end
-  def A(p, rotate, large_angle_flag, sweep_flag, e)
-    add "A#{p} #{rotate} #{large_angle_flag},#{sweep_flag} #{e}"
-  end
+                           def a(p, rotate, large_angle_flag, sweep_flag, e)
+                             add "a#{p} #{rotate} #{large_angle_flag},#{sweep_flag} #{e}"
+                           end
+                           def A(p, rotate, large_angle_flag, sweep_flag, e)
+                             add "A#{p} #{rotate} #{large_angle_flag},#{sweep_flag} #{e}"
+                           end
 
-  def inspect
-    @arr.join(' ')
-  end
-  alias :to_s :inspect
-end
+                           def inspect
+                             @arr.join(' ')
+                           end
+                           alias :to_s :inspect
+                         end
 
-class SVGTime
-  def initialize(arg)
-    @v = case arg
-    when Numeric
-      arg
-    when /^([0-9]+)s$/
-      $1.to_i
-    when /^([0-9]+)\\.([0-9]+)s$/
-      $1.to_f
-    end
-  end
+                         class SVGTime
+                           def initialize(arg)
+                             @v = case arg
+                             when Numeric
+                               arg
+                             when /^([0-9]+)s$/
+                               $1.to_i
+                             when /^([0-9]+)\\.([0-9]+)s$/
+                               $1.to_f
+                             end
+                           end
 
-  def +(s)
-    SVGTime.new(@v+s)
-  end
-  def -(s)
-    SVGTime.new(@v-s)
-  end
+                           def +(s)
+                             SVGTime.new(@v+s)
+                           end
+                           def -(s)
+                             SVGTime.new(@v-s)
+                           end
 
-  def inspect
-    "#{@v}s"
-  end
-  alias :to_s :inspect
+                           def inspect
+                             "#{@v}s"
+                           end
+                           alias :to_s :inspect
 
-  O = SVGTime.new('0s')
-end
+                           O = SVGTime.new('0s')
+                         end
 
-#2<radialGradient>, 2<linearGradient>, 3<stop>
-class SVGGradient < XML::Node
-  attr_reader :gradient, :stops
+                         #2<radialGradient>, 2<linearGradient>, 3<stop>
+                         class SVGGradient < XML::Node
+                           attr_reader :gradient, :stops
 
-  def initialize(type, id, *args)
-    case type.to_sym
-    when :radial
-      r = args[0] || 50
-      fx = args[1] || 50; fy = args[2] || 50
-      cx = args[3] || 50; cy = args[4] || 50
-      super('radialGradient')
-      self * [:id, id, :r, "#{r}%", :fx, "#{fx}%", :fy, "#{fy}%", :cx, "#{cx}%", :cy, "#{cy}%"]
-    when :linear
-      x1 = args[0] || 0; y1 = args[1] || 0
-      x2 = args[2] || 100; y2 = args[3] || 100
-      super('linearGradient')
-      self * [:id, id, :x1, "#{x1}%", :y1, "#{y1}%", :x2, "#{x2}%", :y2, "#{y2}%"]
-    else
-      raise 'Unknown gradiant type'
-    end
-    @stops = []
-  end
+                           def initialize(type, id, *args)
+                             case type.to_sym
+                             when :radial
+                               r = args[0] || 50
+                               fx = args[1] || 50; fy = args[2] || 50
+                               cx = args[3] || 50; cy = args[4] || 50
+                               super('radialGradient')
+                               self * [:id, id, :r, "#{r}%", :fx, "#{fx}%", :fy, "#{fy}%", :cx, "#{cx}%", :cy, "#{cy}%"]
+                             when :linear
+                               x1 = args[0] || 0; y1 = args[1] || 0
+                               x2 = args[2] || 100; y2 = args[3] || 100
+                               super('linearGradient')
+                               self * [:id, id, :x1, "#{x1}%", :y1, "#{y1}%", :x2, "#{x2}%", :y2, "#{y2}%"]
+                             else
+                               raise 'Unknown gradiant type'
+                             end
+                             @stops = []
+                           end
 
-  def stop(offset, color, opacity = 1, style = '')
-    @stops << XML::Node.new('stop') * [:offset, "#{offset}%", :style, "stop-color: #{color}; stop-opacity: #{opacity};#{style}"]
-    self << @stops[-1]
-    self
-  end
+                           def stop(offset, color, opacity = 1, style = '')
+                             @stops << XML::Node.new('stop') * [:offset, "#{offset}%", :style, "stop-color: #{color}; stop-opacity: #{opacity};#{style}"]
+                             self << @stops[-1]
+                             self
+                           end
 
-  def from_to(from, to, op_from = 1, op_to = 1)
-    stop(0, from, op_from)
-    stop(100, to, op_to)
-  end
-end
+                           def from_to(from, to, op_from = 1, op_to = 1)
+                             stop(0, from, op_from)
+                             stop(100, to, op_to)
+                           end
+                         end
 
-if __FILE__ == $0
-  p SVG.new(1,2)
-end
+                         if __FILE__ == $0
+                           p SVG.new(1,2)
+                         end
