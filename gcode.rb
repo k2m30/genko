@@ -36,7 +36,6 @@ class SVGFile
       @paths.push e.attribute_nodes.select { |a| a.name == 'd' }
     end
     @paths.flatten!.map!(&:value).map!{ |path| Savage::Parser.parse path}
-    p paths[3].to_command
     @width = svg.at_css('svg')[:width].to_f
     @height = svg.at_css('svg')[:height].to_f
   end
