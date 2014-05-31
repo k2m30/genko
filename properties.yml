@@ -10,4 +10,3 @@ stepsPerRound : 200
 tickSize : 0.000250
 maxSegmentLength : 10
 changeDirectionThreshhold : 0.2
-		
