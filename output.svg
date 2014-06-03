@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="744.09448819" height="1052.3622047" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="1000.0" height="1000.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<title/>
-	<defs/>
-	<path d=" M176.28125 201.03125 l0 0.625 l0 395.125 l0 0.375 l0.34375 0.0937 l312.34375 91.6875 l0.625 0.1875 l0-0.65625 l0.125-419.09375 l0-0.40625 l-0.40625-0.0937 l-312.4375-67.71875 l-0.59375-0.125 z m1 1.21875 l311.4375 67.5 l-0.125 418.0625 l-311.3125-91.375 l0-394.1875 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M647.21875 206.59375 l-0.6875 0.28125 l-157.59375 62.21875 l-0.3125 0.125 l0 0.34375 l0.1875 419.125 l0 0.75 l0.6875-0.28125 l156.0625-63.1875 l0.3125-0.125 l0-0.34375 l1.34375-418.15625 l0-0.75 z m-1 1.4375 l-1.34375 417.125 l-155.0625 62.78125 l-0.1875-418.03125 l156.59375-61.875 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M355.6875 137.40625 l-0.15625 0.0625 L176.96875 201.0625 L177.3125 202 L355.75 138.4375 L646.78125 207.53125 L647 206.5625 l-291.15625-69.125 l-0.15625-0.0312 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M355.71875 277.53125 l-0.125 0.0312 l-178.9375 47.96875 l-1.8125 0.46875 l1.8125 0.5 l311.625 83.5 l0.15625 0.0312 l0.125-0.0625 l157.59375-53.65625 l1.5625-0.53125 l-1.59375-0.4375 l-290.28125-77.78125 l-0.125-0.0312 z m0 1.03125 L644.3125 355.90625 L488.375 409 L178.71875 326 l177-47.4375 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M355.21875 240.9375 l0 37.125 l1 0 l0-37.125 l-1 0 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M176.28125 202.65625 l0 393.28125 l1 0 l0-393.28125 l-1 0 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M355.71875 409 l-0.125 0.0312 L177 455.8125 l-1.78125 0.46875 l1.78125 0.5 L488.28125 545 l0.15625 0.0312 l0.125-0.0625 l156.71875-56.25 l1.46875-0.53125 l-1.53125-0.40625 l-289.375-78.75 l-0.125-0.0312 z m0 1.03125 l287.6875 78.28125 L488.375 544 L179.03125 456.3125 L355.71875 410.03125 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M355.71875 544 l-0.15625 0.0312 l-178.5625 52.3125 l0.28125 0.96875 l178.4375-52.28125 l289.59375 80.25 l0.28125-0.96875 l-289.75-80.28125 l-0.125-0.0312 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M355.21875 374.34375 l0 35.15625 l1 0 l0-35.15625 l-1 0 z" style="fill: none; stroke: black; stroke-width: 3"/>
-	<path d=" M355.1875 507.03125 l0 37.4375 l1.03125 0 l0-37.4375 l-1.03125 0 z" style="fill: none; stroke: black; stroke-width: 3"/>
+	<defs>
+		<marker id="point" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto" refX="0" refY="0"/>
+	</defs>
+	<marker id="point" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto" refX="0" refY="0"/>
+	<path d="M100 500L400 200L700 500M200 400L600 400L600 800L200 800L200 400M300 500Z" style="fill: none; stroke: black; stroke-width: 3; marker-start: url(#point)"/>
 </svg>
