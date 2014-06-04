@@ -6,6 +6,10 @@ require "pp"
 
 module Savage
   class Path
+    def clone
+      Marshal::load(Marshal.dump(self))
+    end
+    
     def absolute!
       x = y = 0
       start_point = end_point = nil
@@ -69,17 +73,29 @@ class SVGFile
     absolute!
     read_properties
     read_whole_path
-    # make_tpath
+    make_tpath
   end
 
   def absolute!
     @paths.each(&:absolute!)
   end
-
   def make_tpath
-    direction.target.x = Math.sqrt(x*x + y*y)
-    direction.target.y = Math.sqrt((@properties["canvasSizeX"]-x)*(@properties["canvasSizeX"]-x) + y*y)
-    @tpath.subpaths[0].directions << direction
+    x = y = 0
+    path = @whole_path.clone
+    path.subpaths.each do |subpath|      
+      subpath.directions.each do |direction|
+        next if direction.kind_of? Savage::Directions::ClosePath
+        tdirection = direction.clone
+        p direction.object_id
+        p tdirection.object_id
+        x = direction.target.x
+        y = direction.target.y
+        tdirection.target.x = Math.sqrt(x*x + y*y)
+        tdirection.target.y = Math.sqrt((@properties["canvasSizeX"]-x)*(@properties["canvasSizeX"]-x) + y*y)
+        @tpath.subpaths[0].directions << tdirection
+      end
+    end
+    @tpath.close_path
   end
   def read_svg(file_name)
     svg = Nokogiri::XML File.open file_name
@@ -100,7 +116,7 @@ class SVGFile
     @paths.each do |path|
       path.subpaths.each do |subpath|
         subpath.directions.each_with_index do |direction, i|
-          @whole_path.subpaths[0].directions << direction
+          @whole_path.subpaths.first.directions << direction unless direction.kind_of? Savage::Directions::ClosePath
         end
       end
     end
@@ -124,9 +140,9 @@ paths = svg_file.paths
 tpath = [svg_file.tpath]
 
 
+p svg_file.paths
+p svg_file.tpath.object_id
 
 # p svg_file.properties
-# p svg_file.properties
-# p paths[0].subpaths[1]
-# paths[0].subpaths[1].absolute!
+# svg_file.save 'output.svg', [svg_file.whole_path]
 svg_file.save 'output.svg', paths
