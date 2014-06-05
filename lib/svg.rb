@@ -7,8 +7,8 @@ Eregon - 2008
 All angles are in degrees.
 =end
 
-require_relative 'xml'
-require_relative 'point'
+require_relative 'svg/xml'
+require_relative 'svg/point'
 
 module XML
   class Node

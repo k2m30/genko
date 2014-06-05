@@ -1,8 +1,9 @@
 require "nokogiri"
-require_relative "savage"
 require "yaml"
-require_relative "svg"
 require "pp"
+
+require_relative "lib/svg"
+require_relative "lib/savage"
 
 class SVGFile
   attr_reader :paths, :elements, :properties, :whole_path, :tpath, :width, :height, :splitted_path
@@ -26,7 +27,7 @@ class SVGFile
 
   def split
     start_point = nil
-    size = @properties['maxSegmentLength']
+    size = @properties['max_segment_length']
     @whole_path.subpaths.first.directions.each do |direction|
       next if direction.kind_of? Savage::Directions::ClosePath
       end_point = direction.target
@@ -54,7 +55,7 @@ class SVGFile
           when 'M'
             f.write "G00 X#{direction.target.x} Y#{direction.target.y} Z0\n"
           when 'L'
-            f.write "G01 X#{direction.target.x} Y#{direction.target.y} Z10 F#{@properties["linearVelocity"]/direction.rate}\n"
+            f.write "G01 X#{direction.target.x} Y#{direction.target.y} Z10 F#{@properties["linear_velocity"]/direction.rate}\n"
         end
         start_point = direction.target
       end
@@ -86,7 +87,7 @@ class SVGFile
         y = direction.target.y
 
         tdirection.target.x = Math.sqrt(x*x + y*y)
-        tdirection.target.y = Math.sqrt((@properties["canvasSizeX"]-x)*(@properties["canvasSizeX"]-x) + y*y)
+        tdirection.target.y = Math.sqrt((@properties["canvas_size_x"]-x)*(@properties["canvas_size_x"]-x) + y*y)
         tdirection.rate = tdirection.length(start_point_triangle) / direction.length(start_point_linear) if direction.command_code == 'L'
 
         @tpath.subpaths[0].directions << tdirection
