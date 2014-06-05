@@ -6,88 +6,85 @@ require "pp"
 
 module Savage
   class Path
-    def clone
-      Marshal::load(Marshal.dump(self))
-    end
-    
-    def absolute!
-      x = y = 0
-      start_point = end_point = nil
-      @subpaths.each do |subpath|
-        subpath.directions.each_with_index do |direction, i|
-          next if direction.kind_of? Savage::Directions::ClosePath
-          if direction.target.kind_of?(Savage::Directions::Point)
-            x = direction.target.x
-            y = direction.target.y
-          end
-
-          end_point = direction.target
-          unless end_point.kind_of? Savage::Directions::Point
-            case direction.class.to_s
-            when 'Savage::Directions::HorizontalTo'
-              x = direction.target
-              y  = 0 unless direction.absolute?
-              end_point = Savage::Directions::Point.new(x,y)
-              direction = Savage::Directions::LineTo.new(end_point.x, end_point.y, direction.absolute?)
-            when 'Savage::Directions::VerticalTo'
-              x = 0 unless direction.absolute?
-              y = direction.target
-              end_point = Savage::Directions::Point.new(x,y)
-              direction = Savage::Directions::LineTo.new(end_point.x, end_point.y, direction.absolute?)
-            else
-              raise ArgumentError, "Unknown element: #{direction.class}"
-            end #case
-          end #unless
-          end_point = direction.target
-          if direction.relative?
-            begin
-              x += start_point.x
-              y += start_point.y
-              end_point = Savage::Directions::Point.new(x,y)
-              direction.absolute = true
-              direction.target = end_point
-            rescue => e
-              p e.message
-              p e.backtrace[0..2]
-            end #rescue
-          end #unless
-          subpath.directions[i] = direction
-          start_point = end_point
-        end #each
-      end #each
-    end #absolute
   end #Path
+  module Directions
+    class LineTo < PointTarget
+      def split(start_point, size)
+        length = Math.sqrt((start_point.x-target.x)*(start_point.x-target.x)+(start_point.y-target.y)*(start_point.y-target.y))
+        n = (length / (size+1)).ceil
+        dx = (target.x-start_point.x)/n
+        dy = (target.y-start_point.y)/n
+
+        result = []
+        n.times do |i|
+          result << Savage::Directions::LineTo.new(start_point.x + dx*(i+1), start_point.y + dy*(i+1))
+        end
+        result
+      end
+    end#Line_to
+    class MoveTo < PointTarget
+      def split(start_point, size)
+        self
+      end
+    end
+  end #directions
 end #module
 
 class SVGFile
-  attr_reader :paths, :elements, :properties, :whole_path, :tpath, :width, :height
+  attr_reader :paths, :elements, :properties, :whole_path, :tpath, :width, :height, :splitted_path
 
   def initialize(file_name)
     @allowed_elements = ['path']
     @paths = []
     @whole_path = Savage::Path.new
     @tpath = Savage::Path.new
+    @splitted_path = Savage::Path.new    
     @elements = []
     @properties = {}
     read_svg file_name
     absolute!
     read_properties
     read_whole_path
+    split
     make_tpath
   end
 
+  def split
+    start_point = nil
+    size = @properties['maxSegmentLength']
+    @whole_path.subpaths.first.directions.each do |direction|
+      next if direction.kind_of? Savage::Directions::ClosePath
+      end_point = direction.target
+      new_directions = direction.split start_point, size
+      @splitted_path.subpaths.first.directions << new_directions
+      start_point = end_point
+    end
+    @splitted_path.subpaths.first.directions.flatten!
+    @splitted_path.close_path
+  end
+
+  def make_gcode_file
+    begin
+      f = File.new Time.now.strftime("%d-%b-%y %H:%M:%S").to_s + '.gcode', 'w+'
+      f.write "%\n"
+      f.write "G51Y-1\n"
+      f.close        
+    rescue Exception => e
+      p e.message
+      p e.backtrave[0..2]
+    end
+    
+  end
   def absolute!
     @paths.each(&:absolute!)
   end
   def make_tpath
     x = y = 0
-    path = @whole_path.clone
-    path.subpaths.each do |subpath|      
+    path = @splitted_path.clone
+    path.subpaths.each do |subpath|
       subpath.directions.each do |direction|
         next if direction.kind_of? Savage::Directions::ClosePath
         tdirection = direction.clone
-        p direction.object_id
-        p tdirection.object_id
         x = direction.target.x
         y = direction.target.y
         tdirection.target.x = Math.sqrt(x*x + y*y)
@@ -133,16 +130,14 @@ class SVGFile
   end
 end
 
-file_name = ARGV[0] || Dir.pwd + '/Domik.svg'
+# file_name = ARGV[0] || Dir.pwd + '/Domik.svg'
+file_name = ARGV[0] || Dir.pwd + '/rack.svg'
 
 svg_file = SVGFile.new file_name
 paths = svg_file.paths
 tpath = [svg_file.tpath]
-
-
-p svg_file.paths
-p svg_file.tpath.object_id
-
 # p svg_file.properties
+# pp svg_file.splitted_path
 # svg_file.save 'output.svg', [svg_file.whole_path]
-svg_file.save 'output.svg', paths
+svg_file.save 'output.svg', tpath
+svg_file.make_gcode_file
