@@ -1,5 +1,5 @@
 (/Users/Mikhail/projects/genko/rack.svg)
-(06-Jun-14 00:35:39)
+(06-Jun-14 00:40:14)
 ({"initialXTicks"=>1000, "initialYTicks"=>1000, "a"=>10, "canvasSizeX"=>846, "canvasSizeY"=>1200, "linearVelocity"=>15000, "maxV"=>250, "radius"=>7.95, "stepsPerRound"=>200, "tickSize"=>0.00025, "maxSegmentLength"=>10, "changeDirectionThreshhold"=>0.2})
 %
 G51Y-1

@@ -1,44 +1,8 @@
 require "nokogiri"
-require "savage"
+require_relative "savage"
 require "yaml"
 require_relative "svg"
 require "pp"
-
-module Savage
-  class Path
-  end #Path
-  class Direction
-    def clone
-      Marshal::load(Marshal.dump(self))
-    end
-  end
-  module Directions
-    class LineTo < PointTarget
-      attr_accessor :rate
-
-      def length(start_point)
-        Math.sqrt((start_point.x-target.x)*(start_point.x-target.x)+(start_point.y-target.y)*(start_point.y-target.y))
-      end
-
-      def split(start_point, size)
-        n = (self.length(start_point) / (size+1)).ceil
-        dx = (target.x-start_point.x)/n
-        dy = (target.y-start_point.y)/n
-
-        result = []
-        n.times do |i|
-          result << Savage::Directions::LineTo.new(start_point.x + dx*(i+1), start_point.y + dy*(i+1))
-        end
-        result
-      end
-    end #Line_to
-    class MoveTo < PointTarget
-      def split(start_point, size)
-        self
-      end
-    end
-  end #directions
-end #module
 
 class SVGFile
   attr_reader :paths, :elements, :properties, :whole_path, :tpath, :width, :height, :splitted_path
@@ -179,7 +143,7 @@ file_name = ARGV[0] || Dir.pwd + '/rack.svg'
 svg_file = SVGFile.new file_name
 paths = svg_file.paths
 tpath = [svg_file.tpath]
-p svg_file.properties
+#p svg_file.properties
 # pp svg_file.splitted_path
 # svg_file.save 'output.svg', [svg_file.whole_path]
 svg_file.save 'output.svg', tpath
