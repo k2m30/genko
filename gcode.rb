@@ -6,7 +6,7 @@ require_relative "lib/svg"
 require_relative "lib/savage"
 
 class SVGFile
-  attr_reader :paths, :elements, :properties, :whole_path, :tpath, :width, :height, :splitted_path
+  attr_reader :paths, :properties, :whole_path, :tpath
 
   def initialize(file_name)
     @allowed_elements = ['path']
@@ -30,10 +30,9 @@ class SVGFile
     size = @properties['max_segment_length']
     @whole_path.subpaths.first.directions.each do |direction|
       next if direction.kind_of? Savage::Directions::ClosePath
-      end_point = direction.target
       new_directions = direction.split start_point, size
       @splitted_path.subpaths.first.directions << new_directions
-      start_point = end_point
+      start_point = direction.target
     end
     @splitted_path.subpaths.first.directions.flatten!
     @splitted_path.close_path
@@ -128,13 +127,28 @@ class SVGFile
   end
 
   def save(file_name, paths)
-
-    output_file = SVG.new(@width, @height)
+    dimensions = calculate_dimensions(paths)
+    output_file = SVG.new(dimensions[0], dimensions[1])
     output_file.svg << output_file.marker("point", 6, 6)
     paths.each_with_index do |path, i|
       output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 3; marker-start: url(#point)")
     end
     output_file.save(file_name)
+  end
+
+  private
+  def calculate_dimensions(paths)
+    height = width = 0
+    paths.each do |path|
+      path.subpaths.each do |subpath|
+        subpath.directions.each do |direction|
+          next if direction.kind_of? Savage::Directions::ClosePath
+          width = direction.target.x if direction.target.x > width
+          height = direction.target.y if direction.target.y > height
+        end
+      end
+    end
+    [width, height]
   end
 end
 
@@ -143,9 +157,9 @@ file_name = ARGV[0] || Dir.pwd + '/rack.svg'
 
 svg_file = SVGFile.new file_name
 paths = svg_file.paths
-tpath = [svg_file.tpath]
+tpath = svg_file.tpath
 #p svg_file.properties
 # pp svg_file.splitted_path
 # svg_file.save 'output.svg', [svg_file.whole_path]
-svg_file.save 'output.svg', tpath
+svg_file.save 'output.svg', [tpath]
 svg_file.make_gcode_file

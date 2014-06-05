@@ -1,5 +1,5 @@
 (/Users/Mikhail/projects/genko/rack.svg)
-(06-Jun-14 00:55:11)
+(06-Jun-14 01:55:43)
 ({"a"=>10, "canvas_size_x"=>846, "linear_velocity"=>15000, "radius"=>7.95, "max_segment_length"=>10, "change_direction_threshhold"=>0.2})
 %
 G51Y-1
