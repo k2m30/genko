@@ -46,24 +46,27 @@ class SVGFile
       f.write "(#{Time.now.strftime("%d-%b-%y %H:%M:%S").to_s})\n"
       @properties.each_pair { |pair| f.write "(#{pair})\n" }
       f.write "%\n"
-      f.write "G51Y-1\n"
+      #f.write "G51Y-1\n"
       start_point = nil
       @tpath.subpaths.first.directions.each do |direction|
         next if direction.kind_of? Savage::Directions::ClosePath
-        x = direction.target.x - @properties["initial_x"].to_f
-        y = direction.target.y - @properties["initial_y"].to_f
+        x = (direction.target.x - @properties["initial_x"].to_f).round
+        y = (direction.target.y - @properties["initial_y"].to_f).round
         case direction.command_code
           when 'M'
+            f.write "G00 Z0\n"
             f.write "G00 X#{x} Y#{y} Z0\n"
           when 'L'
-            f.write "G01 X#{x} Y#{y} Z10 F#{@properties["linear_velocity"]/direction.rate}\n"
+            feed = (@properties["linear_velocity"] * direction.rate).round
+            f.write "G01 X#{x} Y#{y} Z0 F#{feed}\n"
           else
             raise ArgumentError "Bad command in tpath #{direction.command_code}"
         end
         start_point = direction.target
       end
+      f.write "G00 X0 Y0 Z0\n"
       f.write "M30\n"
-      f.write "%\n"
+      #f.write "%\n"
       f.close
     rescue Exception => e
       p e.message

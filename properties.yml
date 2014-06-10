@@ -1,6 +1,6 @@
 a : 10
 canvas_size_x : 846
-linear_velocity : 15000
+linear_velocity : 8000
 radius : 7.95
 max_segment_length : 10
 change_direction_threshhold : 0.2
