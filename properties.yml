@@ -4,3 +4,5 @@ linear_velocity : 15000
 radius : 7.95
 max_segment_length : 10
 change_direction_threshhold : 0.2
+initial_x : 1000
+initial_y : 1000

@@ -44,17 +44,21 @@ class SVGFile
       f = File.new 'result.gcode', 'w+'
       f.write "(#{@file_name})\n"
       f.write "(#{Time.now.strftime("%d-%b-%y %H:%M:%S").to_s})\n"
-      f.write "(#{@properties})\n"
+      @properties.each_pair { |pair| f.write "(#{pair})\n" }
       f.write "%\n"
       f.write "G51Y-1\n"
       start_point = nil
       @tpath.subpaths.first.directions.each do |direction|
         next if direction.kind_of? Savage::Directions::ClosePath
+        x = direction.target.x - @properties["initial_x"].to_f
+        y = direction.target.y - @properties["initial_y"].to_f
         case direction.command_code
           when 'M'
-            f.write "G00 X#{direction.target.x} Y#{direction.target.y} Z0\n"
+            f.write "G00 X#{x} Y#{y} Z0\n"
           when 'L'
-            f.write "G01 X#{direction.target.x} Y#{direction.target.y} Z10 F#{@properties["linear_velocity"]/direction.rate}\n"
+            f.write "G01 X#{x} Y#{y} Z10 F#{@properties["linear_velocity"]/direction.rate}\n"
+          else
+            raise ArgumentError "Bad command in tpath #{direction.command_code}"
         end
         start_point = direction.target
       end
@@ -130,10 +134,11 @@ class SVGFile
     dimensions = calculate_dimensions(paths)
     output_file = SVG.new(dimensions[0], dimensions[1])
     output_file.svg << output_file.marker("point", 6, 6)
-    paths.each_with_index do |path, i|
+    paths.each do |path|
       output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 3; marker-start: url(#point)")
     end
     output_file.save(file_name)
+    print "Saved to ./#{file_name}\n"
   end
 
   private
@@ -152,8 +157,8 @@ class SVGFile
   end
 end
 
-# file_name = ARGV[0] || Dir.pwd + '/Domik.svg'
-file_name = ARGV[0] || Dir.pwd + '/rack.svg'
+file_name = ARGV[0] || Dir.pwd + '/Domik.svg'
+#file_name = ARGV[0] || Dir.pwd + '/rack.svg'
 
 svg_file = SVGFile.new file_name
 paths = svg_file.paths
@@ -161,5 +166,5 @@ tpath = svg_file.tpath
 #p svg_file.properties
 # pp svg_file.splitted_path
 # svg_file.save 'output.svg', [svg_file.whole_path]
-svg_file.save 'output.svg', [tpath]
+svg_file.save 'result.svg', [tpath]
 svg_file.make_gcode_file
