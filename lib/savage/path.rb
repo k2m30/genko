@@ -9,9 +9,9 @@ module Savage
 
     attr_accessor :subpaths
 
-    define_proxies do |sym,const|
+    define_proxies do |sym, const|
       define_method(sym) do |*args|
-        @subpaths.last.send(sym,*args)
+        @subpaths.last.send(sym, *args)
       end
     end
 
@@ -31,28 +31,44 @@ module Savage
           end
 
           end_point = direction.target
-          unless end_point.kind_of? Savage::Directions::Point
-            case direction.class.to_s
-              when 'Savage::Directions::HorizontalTo'
-                x = direction.target
-                y  = 0 unless direction.absolute?
-                end_point = Savage::Directions::Point.new(x,y)
-                direction = Savage::Directions::LineTo.new(end_point.x, end_point.y, direction.absolute?)
-              when 'Savage::Directions::VerticalTo'
-                x = 0 unless direction.absolute?
-                y = direction.target
-                end_point = Savage::Directions::Point.new(x,y)
-                direction = Savage::Directions::LineTo.new(end_point.x, end_point.y, direction.absolute?)
-              else
-                raise ArgumentError, "Unknown element: #{direction.class}"
-            end #case
-          end #unless
+          case direction.command_code
+            when 'H', 'h'
+              x = direction.target
+              y = 0 unless direction.absolute?
+              end_point = Savage::Directions::Point.new(x, y)
+              direction = Savage::Directions::LineTo.new(end_point.x, end_point.y, direction.absolute?)
+            when 'V', 'v'
+              x = 0 unless direction.absolute?
+              y = direction.target
+              end_point = Savage::Directions::Point.new(x, y)
+              direction = Savage::Directions::LineTo.new(end_point.x, end_point.y, direction.absolute?)
+            when 'L', 'l', 'M', 'm'
+            when 'C'
+            when 'c'
+              direction.control.x += start_point.x
+              direction.control.y += start_point.y
+
+              direction.control_1.x += start_point.x
+              direction.control_1.y += start_point.y
+
+            #when 'S'
+            #when 's'
+            #  direction.control.x += start_point.x
+            #  direction.control.y += start_point.y
+            #
+            #  direction.control_1.x += start_point.x
+            #  direction.control_1.y += start_point.y
+
+            else
+              raise ArgumentError, "Unknown element: #{direction.command_code}, #{direction}"
+          end
           end_point = direction.target
           if direction.relative?
             begin
               x += start_point.x
               y += start_point.y
-              end_point = Savage::Directions::Point.new(x,y)
+
+              end_point = Savage::Directions::Point.new(x, y)
               direction.absolute = true
               direction.target = end_point
             rescue => e
@@ -64,7 +80,9 @@ module Savage
           start_point = end_point
         end #each
       end #each
-    end #absolute
+    end
+
+    #absolute
 
     def initialize(*args)
       @subpaths = [SubPath.new]
@@ -97,7 +115,7 @@ module Savage
     def transform(*args)
       dup.tap do |path|
         path.to_transformable_commands!
-        path.subpaths.each {|subpath| subpath.transform *args }
+        path.subpaths.each { |subpath| subpath.transform *args }
       end
     end
 

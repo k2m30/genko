@@ -70,7 +70,7 @@ class SVGFile
       f.close
     rescue Exception => e
       p e.message
-      p e.backtrace[0..2]
+      p e.backtrace[0..5].join
     end
 
   end
@@ -95,7 +95,7 @@ class SVGFile
         tdirection.target.x = Math.sqrt(x*x + y*y)
         tdirection.target.y = Math.sqrt((@properties["canvas_size_x"]-x)*(@properties["canvas_size_x"]-x) + y*y)
         tdirection.rate = tdirection.length(start_point_triangle) / direction.length(start_point_linear) if direction.command_code == 'L'
-
+        p tdirection.rate unless direction.command_code == 'M'
         @tpath.subpaths[0].directions << tdirection
 
         start_point_linear = direction.target
@@ -160,14 +160,15 @@ class SVGFile
   end
 end
 
-file_name = ARGV[0] || Dir.pwd + '/Domik.svg'
+#file_name = ARGV[0] || Dir.pwd + '/Domik.svg'
 #file_name = ARGV[0] || Dir.pwd + '/rack.svg'
+file_name = ARGV[0] || Dir.pwd + '/curve.svg'
 
 svg_file = SVGFile.new file_name
 paths = svg_file.paths
 tpath = svg_file.tpath
 #p svg_file.properties
-# pp svg_file.splitted_path
+
 # svg_file.save 'output.svg', [svg_file.whole_path]
 svg_file.save 'result.svg', [tpath]
 svg_file.make_gcode_file

@@ -3,6 +3,41 @@ module Savage
     class CubicCurveTo < QuadraticCurveTo
       attr_accessor :control_1
 
+      def split(start_point, size)
+        n = 10
+
+        x0 = start_point.x
+        y0 = start_point.y
+
+        x1 = @control_1.x
+        y1 = @control_1.y
+
+        x2 = control_2.x
+        y2 = control_2.y
+
+        x3 = @target.x
+        y3 = @target.y
+
+        dt = 1.0/n
+        t = dt
+
+        result = []
+        (n-1).times do
+          x = (1 - t) * (1 - t) * (1 - t) * x0 + 3 * t * (1 - t) * (1 - t) * x1 + 3 * t * t * (1 - t) * x2 + t * t * t * x3
+          y = (1 - t) * (1 - t) * (1 - t) * y0 + 3 * t * (1 - t) * (1 - t) * y1 + 3 * t * t * (1 - t) * y2 + t * t * t * y3
+
+          result << Savage::Directions::LineTo.new(x, y)
+          t+=dt
+          p [x,y]
+        end
+        t = 1
+        x = (1 - t) * (1 - t) * (1 - t) * x0 + 3 * t * (1 - t) * (1 - t) * x1 + 3 * t * t * (1 - t) * x2 + t * t * t * x3
+        y = (1 - t) * (1 - t) * (1 - t) * y0 + 3 * t * (1 - t) * (1 - t) * y1 + 3 * t * t * (1 - t) * y2 + t * t * t * y3
+        p [x,y]
+        result << Savage::Directions::LineTo.new(x, y)
+
+      end
+
       def initialize(*args)
         raise ArgumentError if args.length < 4
         case args.length
