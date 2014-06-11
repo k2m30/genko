@@ -51,14 +51,14 @@ module Savage
               direction.control_1.x += start_point.x
               direction.control_1.y += start_point.y
 
-            #when 'S'
-            #when 's'
-            #  direction.control.x += start_point.x
-            #  direction.control.y += start_point.y
-            #
-            #  direction.control_1.x += start_point.x
-            #  direction.control_1.y += start_point.y
-
+            when 'S'
+            when 's'
+              direction.control.x += start_point.x
+              direction.control.y += start_point.y
+            when 'Q'
+            when 'q'
+              direction.control.x += start_point.x
+              direction.control.y += start_point.y
             else
               raise ArgumentError, "Unknown element: #{direction.command_code}, #{direction}"
           end

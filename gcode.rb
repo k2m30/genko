@@ -19,18 +19,36 @@ class SVGFile
     @file_name = file_name
     read_svg @file_name
     absolute!
+    close_paths
     read_properties
     read_whole_path
     split
     make_tpath
   end
 
+  def close_paths
+    @paths.each do |path|
+      path.subpaths.each do |subpath|
+        if subpath.directions.last.kind_of? Savage::Directions::ClosePath
+          point = find_first_point(subpath)
+          size = subpath.directions.size
+          subpath.directions[size-1] = Savage::Directions::LineTo.new(point.x, point.y)
+        end
+      end
+    end
+  end
+
   def split
     start_point = nil
     size = @properties['max_segment_length']
-    @whole_path.subpaths.first.directions.each do |direction|
+    @whole_path.subpaths.first.directions.each_with_index do |direction, i|
       next if direction.kind_of? Savage::Directions::ClosePath
-      new_directions = direction.split start_point, size
+      if %w[S s T t].include? direction.command_code # smooth curves need second control point of previous curve
+        new_directions = direction.split start_point, size, @whole_path.subpaths.first.directions[i-1].control_2
+      else
+        new_directions = direction.split start_point, size
+      end
+
       @splitted_path.subpaths.first.directions << new_directions
       start_point = direction.target
     end
@@ -50,14 +68,14 @@ class SVGFile
       start_point = nil
       @tpath.subpaths.first.directions.each do |direction|
         next if direction.kind_of? Savage::Directions::ClosePath
-        x = (direction.target.x - @properties["initial_x"].to_f).round
-        y = (direction.target.y - @properties["initial_y"].to_f).round
+        x = (direction.target.x - @properties["initial_x"].to_f).round(2)
+        y = (direction.target.y - @properties["initial_y"].to_f).round(2)
         case direction.command_code
           when 'M'
             f.write "G00 Z0\n"
             f.write "G00 X#{x} Y#{y} Z0\n"
           when 'L'
-            feed = (@properties["linear_velocity"] * direction.rate).round
+            feed = (@properties["linear_velocity"] * direction.rate).round(2)
             f.write "G01 X#{x} Y#{y} Z0 F#{feed}\n"
           else
             raise ArgumentError "Bad command in tpath #{direction.command_code}"
@@ -95,7 +113,6 @@ class SVGFile
         tdirection.target.x = Math.sqrt(x*x + y*y)
         tdirection.target.y = Math.sqrt((@properties["canvas_size_x"]-x)*(@properties["canvas_size_x"]-x) + y*y)
         tdirection.rate = tdirection.length(start_point_triangle) / direction.length(start_point_linear) if direction.command_code == 'L'
-        p tdirection.rate unless direction.command_code == 'M'
         @tpath.subpaths[0].directions << tdirection
 
         start_point_linear = direction.target
@@ -135,7 +152,7 @@ class SVGFile
 
   def save(file_name, paths)
     dimensions = calculate_dimensions(paths)
-    output_file = SVG.new(dimensions[0], dimensions[1])
+    output_file = SVG.new(dimensions[0]+10, dimensions[1]+10)
     output_file.svg << output_file.marker("point", 6, 6)
     paths.each do |path|
       output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 3; marker-start: url(#point)")
@@ -158,11 +175,19 @@ class SVGFile
     end
     [width, height]
   end
+
+  def find_first_point(subpath)
+    start_point = nil
+    subpath.directions.each do |direction|
+      return start_point unless %w[M m].include? direction.command_code
+      start_point = direction.target
+    end
+  end
 end
 
 #file_name = ARGV[0] || Dir.pwd + '/Domik.svg'
 #file_name = ARGV[0] || Dir.pwd + '/rack.svg'
-file_name = ARGV[0] || Dir.pwd + '/curve.svg'
+file_name = ARGV[0] || Dir.pwd + '/images' + '/font.svg'
 
 svg_file = SVGFile.new file_name
 paths = svg_file.paths
@@ -170,5 +195,6 @@ tpath = svg_file.tpath
 #p svg_file.properties
 
 # svg_file.save 'output.svg', [svg_file.whole_path]
+svg_file.save 'simplified.svg', svg_file.paths
 svg_file.save 'result.svg', [tpath]
 svg_file.make_gcode_file
