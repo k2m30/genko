@@ -3,12 +3,5 @@
 <svg width="900" height="950" version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink">
   <title/>
-  <path d="M200 200 L500 200" style="fill: none; stroke: black; stroke-width: 1;"/>
-  <path d="M500 300 L200 300" style="fill: none; stroke: black; stroke-width: 2;"/>
-  <path d="M200 400 L500 400" style="fill: none; stroke: black; stroke-width: 3;"/>
-  <path d="M500 500 L200 500" style="fill: none; stroke: black; stroke-width: 4;"/>
-  <path d="M200 600 L500 600" style="fill: none; stroke: black; stroke-width: 5;"/>
-  <path d="M500 700 L200 700" style="fill: none; stroke: black; stroke-width: 6;"/>
-  <path d="M200 800 L500 800" style="fill: none; stroke: black; stroke-width: 7;"/>
-  <path d="M500 900 L200 900" style="fill: none; stroke: black; stroke-width: 8;"/>
+  <path d="M200 200 L800 200 L800 800 L200 800 L200 200" style="fill: none; stroke: black; stroke-width: 1;"/>
 </svg>

@@ -73,12 +73,13 @@ class SVGFile
             f.write "G00 X#{x} Y#{y} Z0\n"
           when 'L'
             feed = (@properties["linear_velocity"] * direction.rate).round(2)
-            f.write "G01 X#{x} Y#{y} Z10 F#{feed}\n"
+            f.write "G01 X#{x} Y#{y} Z4 F#{feed}\n"
           else
             raise ArgumentError "Bad command in tpath #{direction.command_code}"
         end
         start_point = direction.target
       end
+      f.write "G00 Z0\n"
       f.write "G00 X0 Y0 Z0\n"
       f.write "M30\n"
       #f.write "%\n"

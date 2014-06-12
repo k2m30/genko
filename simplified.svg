@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="510.0" height="910.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="810.0" height="810.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<title/>
 	<defs>
 		<marker id="point" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto" refX="0" refY="0"/>
 	</defs>
 	<marker id="point" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto" refX="0" refY="0"/>
-	<path d="M200 200L500 200M500 300L200 300M200 400L500 400M500 500L200 500M200 600L500 600M500 700L200 700M200 800L500 800M500 900L200 900Z" style="fill: none; stroke: black; stroke-width: 3; marker-start: url(#point)"/>
+	<path d="M200 200L800 200L800 800L200 800L200 200Z" style="fill: none; stroke: black; stroke-width: 3; marker-start: url(#point)"/>
 </svg>
