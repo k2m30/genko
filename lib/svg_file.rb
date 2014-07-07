@@ -73,7 +73,7 @@ class SVGFile
             f.write "G00 X#{x} Y#{y} Z0\n"
           when 'L'
             feed = (@properties["linear_velocity"] * direction.rate).round(2)
-            f.write "G01 X#{x} Y#{y} Z4 F#{feed}\n"
+            f.write "G01 X#{x} Y#{y} Z12 F#{feed}\n"
           else
             raise ArgumentError "Bad command in tpath #{direction.command_code}"
         end
@@ -97,6 +97,9 @@ class SVGFile
 
   def make_tpath
     x = y = 0
+    dx = @properties["dx"]
+    dy = @properties["dy"]
+    w = @properties["canvas_size_x"]
     path = @splitted_path.clone
     path.subpaths.each do |subpath|
       start_point_linear = nil
@@ -105,11 +108,19 @@ class SVGFile
         next if direction.kind_of? Savage::Directions::ClosePath
         tdirection = direction.clone
 
-        x = direction.target.x
-        y = direction.target.y
+        #x = direction.target.x
+        #y = direction.target.y
+        #
+        #x = x - dx/2
+        #y = y - dy
+        #tdirection.target.x = Math.sqrt(x*x + y*y)
+        #
+        #x = x - dx/2
+        #y = y - dy
+        #tdirection.target.y = Math.sqrt((w-x)*(w-x) + y*y)
 
-        tdirection.target.x = Math.sqrt(x*x + y*y)
-        tdirection.target.y = Math.sqrt((@properties["canvas_size_x"]-x)*(@properties["canvas_size_x"]-x) + y*y)
+        tdirection.target = point_transform(direction.target)
+
         tdirection.rate = tdirection.length(start_point_triangle) / direction.length(start_point_linear) if direction.command_code == 'L'
         @tpath.subpaths[0].directions << tdirection
 
@@ -118,6 +129,52 @@ class SVGFile
       end
     end
     @tpath.close_path
+  end
+
+  def point_transform(point)
+    dx = @properties["dx"]
+    dy = @properties["dy"]
+    w = @properties["canvas_size_x"]
+
+    x = point.x - dx/2
+    y = point.y - dy
+    lx = Math.sqrt(x*x + y*y)
+
+    x = point.x + dx/2
+    y = point.y - dy
+    ly = Math.sqrt((w-x)*(w-x) + y*y)
+
+    Savage::Directions::Point.new lx, ly
+  end
+
+
+  def point_to_triangle(x,y)
+    dx = @properties["dx"]
+    dy = @properties["dy"]
+    w = @properties["canvas_size_x"]
+
+    x = x - dx/2
+    y = y - dy
+    lx = Math.sqrt(x*x + y*y)
+    x = x + dx
+    ly = Math.sqrt((w-x)*(w-x) + y*y)
+
+    [lx - @properties["initial_x"], ly - @properties["initial_y"]]
+  end
+
+  def tpoint_to_decart(lx, ly)
+    dx = @properties["dx"]
+    dy = @properties["dy"]
+    w = @properties["canvas_size_x"]
+
+    lx += @properties["initial_x"]
+    ly += @properties["initial_y"]
+
+
+    x = ((lx*lx - ly*ly + w*w - w * dx)/(2*(w-dx))).round(3)
+    y = (Math.sqrt(lx*lx - (x-dx/2)*(x-dx/2))+dy).round(3)
+
+    [x, y]
   end
 
   def read_svg(file_name)
@@ -153,7 +210,7 @@ class SVGFile
     output_file = SVG.new(dimensions[0]+10, dimensions[1]+10)
     output_file.svg << output_file.marker("point", 6, 6)
     paths.each do |path|
-      output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 3; marker-start: url(#point)")
+      output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 15; marker-start: url(#point)")
     end
     output_file.save(file_name)
     print "Saved to ./#{file_name}\n"

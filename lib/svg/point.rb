@@ -94,13 +94,13 @@ class Point
 end
 
 require 'rspec'
-describe Point do
-  it '+' do
-    (Point.new(2,3) + Point.new(3,4)).should == Point.new(5,7)
-    (Point.new(2,3) + 4).should == Point.new(6,7)
-  end
-  it '>>' do
-    (Point.new(2,3) >> Point.new(1,1)).should == Point.new(3,2)
-    (Point.new(2,3) >> 1).should == Point.new(3,2)
-  end
-end
+# describe Point do
+#   it '+' do
+#     (Point.new(2,3) + Point.new(3,4)).should == Point.new(5,7)
+#     (Point.new(2,3) + 4).should == Point.new(6,7)
+#   end
+#   it '>>' do
+#     (Point.new(2,3) >> Point.new(1,1)).should == Point.new(3,2)
+#     (Point.new(2,3) >> 1).should == Point.new(3,2)
+#   end
+# end
