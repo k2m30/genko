@@ -5,6 +5,8 @@ require 'open-uri'
 class SVGFile
   attr_reader :paths, :properties, :whole_path, :tpath
 
+  COLORS = %w[red yellow green white black grey blue]
+
   def initialize(file_name)
     @allowed_elements = ['path']
     @paths = []

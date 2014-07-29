@@ -1,7 +1,7 @@
-canvas_size_x : 1112.0
+canvas_size_x : 6000.0
 linear_velocity : 12000.0
 max_segment_length : 10
-initial_x : 1030.0
-initial_y : 1030.0
+initial_x : 3030.0
+initial_y : 3030.0
 dx : 60.0
 dy : 134.0
