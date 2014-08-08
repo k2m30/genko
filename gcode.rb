@@ -4,26 +4,38 @@ require_relative 'lib/svg'
 require_relative 'lib/savage'
 require_relative 'lib/svg_file'
 
+COLORS = %w[red yellow green white black grey blue]
+
+def split_colors(file_name)
+  layers = []
+  svg = Nokogiri::XML::Document.parse open file_name
+  svg.root.elements.select { |e| e.attributes["id"] && COLORS.map { |color| e.attributes["id"].value.include? color } }.each do |layer|
+    name = layer.attributes["id"].value
+    builder = Nokogiri::XML::Builder.new do
+      doc.create_internal_subset('svg', '-//W3C//DTD SVG 1.1//EN', 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd')
+      svg('version' => '1.1', 'xmlns' => 'http://www.w3.org/2000/svg', 'xmlns:xlink' => 'http://www.w3.org/1999/xlink') {
+        parent << layer.to_xml
+      }
+    end
+
+    File.open("./#{name}.svg", 'w+') do |f|
+      f.write builder.to_xml
+      layers << f.path
+    end
+  end
+  return layers
+end
+
 file_name = ARGV[0] || Dir.pwd + '/images' + '/risovaka007_003.svg'
-# file_name = ARGV[0] || 'http://openclipart.org/people/rastrojo2/1360514599.svg'
+tmp_files = split_colors(file_name)
+p tmp_files
+tmp_files.each do |name|
+  svg_file = SVGFile.new name
 
-svg_file = SVGFile.new file_name
+  tpath = svg_file.tpath
 
+  svg_file.save "#{name}_simplified.svg", [svg_file.whole_path]
+  svg_file.save "#{name}_result.svg", [tpath]
+  svg_file.make_gcode_file
+end
 
-# x,y = 900,300
-#
-# point = Savage::Directions::Point.new x, y
-# tpoint = svg_file.point_transform(point)
-# belt_x = tpoint.x
-# belt_y = tpoint.y
-#
-# gpoint = svg_file.point_to_triangle(x,y)
-# pp "G00 X#{gpoint[0]} Y#{gpoint[1]} Z0"
-# pp ['Belts: ',belt_x, belt_y]
-# pp ['x, y :',svg_file.tpoint_to_decart(belt_x-1000, belt_y-1000)]
-
-tpath = svg_file.tpath
-
-svg_file.save 'simplified.svg', [svg_file.whole_path]
-svg_file.save 'result.svg', [tpath]
-svg_file.make_gcode_file
