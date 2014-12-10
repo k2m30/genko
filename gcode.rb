@@ -18,7 +18,7 @@ def split_colors(file_name)
       }
     end
 
-    File.open("./#{name}.svg", 'w+') do |f|
+    File.open("#{name}.svg", 'w+') do |f|
       f.write builder.to_xml
       layers << f.path
     end
@@ -29,13 +29,17 @@ end
 file_name = ARGV[0] || Dir.pwd + '/images' + '/risovaka007_003.svg'
 tmp_files = split_colors(file_name)
 p tmp_files
-tmp_files.each do |name|
+tmp_files.each_with_index do |name, i|
   svg_file = SVGFile.new name
 
   tpath = svg_file.tpath
+  new_name = "./result/0#{i.next}_#{name.gsub('.svg','')}"
+  svg_file.save "#{new_name}_simplified.svg", [svg_file.whole_path]
+  svg_file.save "#{new_name}_result.svg", [tpath]
+  svg_file.make_gcode_file "#{new_name + '.gcode'}"
+end
 
-  svg_file.save "#{name}_simplified.svg", [svg_file.whole_path]
-  svg_file.save "#{name}_result.svg", [tpath]
-  svg_file.make_gcode_file
+tmp_files.each do |file|
+  File.delete file
 end
 

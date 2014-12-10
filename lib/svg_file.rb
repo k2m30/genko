@@ -55,10 +55,9 @@ class SVGFile
     @splitted_path.close_path
   end
 
-  def make_gcode_file
+  def make_gcode_file file_name
     begin
-      # f = File.new Time.now.strftime("%d-%b-%y %H:%M:%S").to_s + '.gcode', 'w+'
-      f = File.new 'result.gcode', 'w+'
+      f = File.new file_name, 'w+'
       f.write "(#{@file_name})\n"
       f.write "(#{Time.now.strftime("%d-%b-%y %H:%M:%S").to_s})\n"
       @properties.each_pair { |pair| f.write "(#{pair})\n" }
@@ -215,7 +214,7 @@ class SVGFile
       output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 15; marker-start: url(#point)")
     end
     output_file.save(file_name)
-    print "Saved to ./#{file_name}\n"
+    print "Saved to #{file_name}\n"
   end
 
   private
