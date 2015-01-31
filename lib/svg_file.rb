@@ -2,6 +2,7 @@ require 'nokogiri'
 require 'yaml'
 require 'open-uri'
 
+
 class SVGFile
   attr_reader :paths, :properties, :whole_path, :tpath
 
@@ -13,6 +14,7 @@ class SVGFile
     @whole_path = Savage::Path.new
     @tpath = Savage::Path.new
     @splitted_path = Savage::Path.new
+    @arris_highlighted_path = Savage::Path.new
     @elements = []
     @properties = {}
     @file_name = file_name
@@ -23,6 +25,27 @@ class SVGFile
     read_whole_path
     split
     make_tpath
+    highlight_arris
+  end
+
+  def highlight_arris
+    @tpath.calculate_angles
+    # directions.each_with_index do |direction, i|
+    #   next_direction = directions[i+1]
+    #   break if next_direction.kind_of? Savage::Directions::ClosePath
+    #   # next if direction.command_code == 'M' || next_direction.command_code == 'M'
+    #   dx = next_direction.target.x - direction.target.x
+    #   dy = next_direction.target.y - direction.target.y
+    #
+    #   if dy != 0
+    #     tg = dx / dy
+    #   else
+    #     dx >=0 ? tg = Float::INFINITY : -Float::INFINITY
+    #   end
+    #   direction.angle = to_deg(Math.atan(tg))
+    #   # p [to_deg(Math.atan(tg)), direction.command_code]
+    #   pp direction
+    # end
   end
 
   def close_paths
@@ -149,7 +172,7 @@ class SVGFile
   end
 
 
-  def point_to_triangle(x,y)
+  def point_to_triangle(x, y)
     dx = @properties["dx"]
     dy = @properties["dy"]
     w = @properties["canvas_size_x"]

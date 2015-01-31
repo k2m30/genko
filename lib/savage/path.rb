@@ -96,6 +96,23 @@ module Savage
       directions
     end
 
+    def calculate_angles
+      directions.each_with_index do |direction, i|
+        next_direction = directions[i+1]
+        break if next_direction.kind_of? Savage::Directions::ClosePath
+        # next if direction.command_code == 'M' || next_direction.command_code == 'M'
+        dx = next_direction.target.x - direction.target.x
+        dy = next_direction.target.y - direction.target.y
+
+        if dy != 0
+          tg = dx / dy
+        else
+          dx >=0 ? tg = Float::INFINITY : -Float::INFINITY
+        end
+        direction.angle = to_deg(Math.atan(tg))
+      end
+    end
+
     def move_to(*args)
       unless (@subpaths.last.directions.empty?)
         (@subpaths << SubPath.new(*args)).last
@@ -129,6 +146,11 @@ module Savage
 
     def fully_transformable?
       subpaths.all? &:fully_transformable?
+    end
+
+    private
+    def to_deg(angle)
+      angle * 180 / Math::PI
     end
 
   end

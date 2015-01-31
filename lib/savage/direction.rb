@@ -8,7 +8,7 @@ module Savage
     include Utils
     include Transformable
 
-    attr_accessor :absolute
+    attr_accessor :absolute, :angle
 
     def initialize(absolute)
       @absolute = absolute
