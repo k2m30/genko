@@ -145,8 +145,8 @@ XML::Node 2 defs
   end
 
   #<path>
-  def path(d, style = '')
-    XML::Node.new('path') * [:d, d, :style, style]
+  def path(d, stroke, stroke_width, fill='none')
+    XML::Node.new('path') * [:d, d, :stroke, stroke, :"stroke-width", stroke_width, :fill, fill]
   end
 
   #<text>

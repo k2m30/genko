@@ -47,7 +47,6 @@ class SVGFile
   end
 
   def split
-    # start_point = nil
     size = @properties['max_segment_length']
     @whole_path.directions.each_with_index do |direction, i|
       if %w[S s T t].include? direction.command_code # smooth curves need second control point of previous curve
@@ -55,11 +54,9 @@ class SVGFile
       else
         new_directions = direction.split size
       end
-
       subpath = Savage::SubPath.new
       subpath.directions = new_directions
       @splitted_path.subpaths << subpath
-      # start_point = direction.target
     end
     @splitted_path.directions.flatten!
     @splitted_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
@@ -115,7 +112,11 @@ class SVGFile
       tdirection.target = point_transform(direction.target)
 
       tdirection.rate = tdirection.length / direction.length if direction.command_code == 'L'
-      @tpath.subpaths.first.directions << tdirection
+
+      subpath = Savage::SubPath.new
+      subpath.directions = [tdirection]
+      @tpath.subpaths << subpath
+
       @tpath.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
       @tpath.calculate_angles!
     end
@@ -189,35 +190,41 @@ class SVGFile
           @whole_path.subpaths.first.directions << direction unless direction.kind_of? Savage::Directions::ClosePath
         end
       end
-      path.close_path if path.directions.last.kind_of? Savage::Directions::ClosePath
     end
     @whole_path.subpaths.first.directions << Savage::Directions::MoveTo.new(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_angles!
   end
 
-  def save(file_name, paths)
-    dimensions = calculate_dimensions(paths)
+  def save(file_name, path)
+    dimensions = calculate_dimensions(path)
     output_file = SVG.new(dimensions[0]+10, dimensions[1]+10)
     output_file.svg << output_file.marker("point", 6, 6)
-    paths.each do |path|
-      output_file.svg << output_file.path(path.to_command, "fill: none; stroke: black; stroke-width: 15; marker-start: url(#point)")
+    path.subpaths.each_with_index do |subpath, i|
+      if subpath.directions.first.kind_of? Savage::Directions::MoveTo
+        move_to_subpath = Savage::SubPath.new
+        position = path.subpaths[i-1].directions.last.target
+        target = subpath.directions.first.target
+        move_to_subpath.directions = [Savage::Directions::MoveTo.new(position.x, position.y), Savage::Directions::LineTo.new(target.x, target.y)]
+        output_file.svg << output_file.path(move_to_subpath.to_command, 'red', 2)
+      else
+        point = path.subpaths[i-1].directions.last.target
+        subpath.directions.insert(0, Savage::Directions::MoveTo.new(point.x, point.y))
+      end
+
+      output_file.svg << output_file.path(subpath.to_command, 'black', 15)
+
     end
     output_file.save(file_name)
     print "Saved to #{file_name}\n"
   end
 
   private
-  def calculate_dimensions(paths)
+  def calculate_dimensions(path)
     height = width = 0
-    paths.each do |path|
-      path.subpaths.each do |subpath|
-        subpath.directions.each do |direction|
-          next if direction.kind_of? Savage::Directions::ClosePath
-          width = direction.target.x if direction.target.x > width
-          height = direction.target.y if direction.target.y > height
-        end
-      end
+    path.directions.each do |direction|
+      width = direction.target.x if direction.target.x > width
+      height = direction.target.y if direction.target.y > height
     end
     [width, height]
   end
