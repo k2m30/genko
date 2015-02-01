@@ -4,7 +4,7 @@ require 'open-uri'
 
 
 class SVGFile
-  attr_reader :paths, :properties, :whole_path, :tpath
+  attr_reader :paths, :properties, :whole_path, :tpath, :splitted_path
 
   COLORS = %w[red yellow green white black grey blue]
 
@@ -25,27 +25,14 @@ class SVGFile
     read_whole_path
     split
     make_tpath
-    highlight_arris
+    # highlight_arris
   end
 
   def highlight_arris
-    @tpath.calculate_angles
-    # directions.each_with_index do |direction, i|
-    #   next_direction = directions[i+1]
-    #   break if next_direction.kind_of? Savage::Directions::ClosePath
-    #   # next if direction.command_code == 'M' || next_direction.command_code == 'M'
-    #   dx = next_direction.target.x - direction.target.x
-    #   dy = next_direction.target.y - direction.target.y
-    #
-    #   if dy != 0
-    #     tg = dx / dy
-    #   else
-    #     dx >=0 ? tg = Float::INFINITY : -Float::INFINITY
-    #   end
-    #   direction.angle = to_deg(Math.atan(tg))
-    #   # p [to_deg(Math.atan(tg)), direction.command_code]
-    #   pp direction
-    # end
+    # @tpath.calculate_angles!
+    @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
+    @whole_path.calculate_angles!
+    pp @whole_path
   end
 
   def close_paths
@@ -53,29 +40,30 @@ class SVGFile
       path.subpaths.each do |subpath|
         if subpath.directions.last.kind_of? Savage::Directions::ClosePath
           point = find_first_point(subpath)
-          size = subpath.directions.size
-          subpath.directions[size-1] = Savage::Directions::LineTo.new(point.x, point.y)
+          subpath.directions[-1] = Savage::Directions::LineTo.new(point.x, point.y) unless point == subpath.directions[-2].target
         end
       end
     end
   end
 
   def split
-    start_point = nil
+    # start_point = nil
     size = @properties['max_segment_length']
-    @whole_path.subpaths.first.directions.each_with_index do |direction, i|
-      next if direction.kind_of? Savage::Directions::ClosePath
+    @whole_path.directions.each_with_index do |direction, i|
       if %w[S s T t].include? direction.command_code # smooth curves need second control point of previous curve
-        new_directions = direction.split start_point, size, @whole_path.subpaths.first.directions[i-1].control_2
+        new_directions = direction.split size, @whole_path.subpaths.first.directions[i-1].control_2
       else
-        new_directions = direction.split start_point, size
+        new_directions = direction.split size
       end
 
-      @splitted_path.subpaths.first.directions << new_directions
-      start_point = direction.target
+      subpath = Savage::SubPath.new
+      subpath.directions = new_directions
+      @splitted_path.subpaths << subpath
+      # start_point = direction.target
     end
-    @splitted_path.subpaths.first.directions.flatten!
-    @splitted_path.close_path
+    @splitted_path.directions.flatten!
+    @splitted_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
+    @splitted_path.calculate_angles!
   end
 
   def make_gcode_file file_name
@@ -120,52 +108,28 @@ class SVGFile
   end
 
   def make_tpath
-    x = y = 0
-    dx = @properties["dx"]
-    dy = @properties["dy"]
-    w = @properties["canvas_size_x"]
     path = @splitted_path.clone
-    path.subpaths.each do |subpath|
-      start_point_linear = nil
-      start_point_triangle = nil
-      subpath.directions.each do |direction|
-        next if direction.kind_of? Savage::Directions::ClosePath
-        tdirection = direction.clone
+    path.directions.each do |direction|
+      tdirection = direction.clone
+      tdirection.position = point_transform(direction.position)
+      tdirection.target = point_transform(direction.target)
 
-        #x = direction.target.x
-        #y = direction.target.y
-        #
-        #x = x - dx/2
-        #y = y - dy
-        #tdirection.target.x = Math.sqrt(x*x + y*y)
-        #
-        #x = x - dx/2
-        #y = y - dy
-        #tdirection.target.y = Math.sqrt((w-x)*(w-x) + y*y)
-
-        tdirection.target = point_transform(direction.target)
-
-        tdirection.rate = tdirection.length(start_point_triangle) / direction.length(start_point_linear) if direction.command_code == 'L'
-        @tpath.subpaths[0].directions << tdirection
-
-        start_point_linear = direction.target
-        start_point_triangle = tdirection.target
-      end
+      tdirection.rate = tdirection.length / direction.length if direction.command_code == 'L'
+      @tpath.subpaths.first.directions << tdirection
+      @tpath.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
+      @tpath.calculate_angles!
     end
-    @tpath.close_path
   end
 
   def point_transform(point)
-    dx = @properties["dx"]
-    dy = @properties["dy"]
     w = @properties["canvas_size_x"]
 
-    x = point.x - dx/2
-    y = point.y - dy
+    x = point.x
+    y = point.y
     lx = Math.sqrt(x*x + y*y)
 
-    x = point.x + dx/2
-    y = point.y - dy
+    x = point.x
+    y = point.y
     ly = Math.sqrt((w-x)*(w-x) + y*y)
 
     Savage::Directions::Point.new lx, ly
@@ -225,8 +189,11 @@ class SVGFile
           @whole_path.subpaths.first.directions << direction unless direction.kind_of? Savage::Directions::ClosePath
         end
       end
+      path.close_path if path.directions.last.kind_of? Savage::Directions::ClosePath
     end
-    @whole_path.close_path
+    @whole_path.subpaths.first.directions << Savage::Directions::MoveTo.new(@properties['initial_x'], @properties['initial_y'])
+    @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
+    @whole_path.calculate_angles!
   end
 
   def save(file_name, paths)

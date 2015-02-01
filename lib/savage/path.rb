@@ -96,18 +96,24 @@ module Savage
       directions
     end
 
-    def calculate_angles
+    def calculate_start_points!(initial_x = 0, initial_y = 0)
+      directions.first.position = Savage::Directions::Point.new initial_x, initial_y
       directions.each_with_index do |direction, i|
         next_direction = directions[i+1]
-        break if next_direction.kind_of? Savage::Directions::ClosePath
-        # next if direction.command_code == 'M' || next_direction.command_code == 'M'
-        dx = next_direction.target.x - direction.target.x
-        dy = next_direction.target.y - direction.target.y
+        break if next_direction.nil?
+        next_direction.position = direction.target
+      end
+    end
+
+    def calculate_angles!
+      directions.each do |direction|
+        dx = direction.target.x - direction.position.x
+        dy = -(direction.target.y - direction.position.y) # Y axis inverted on the screen and .svg files
 
         if dy != 0
           tg = dx / dy
         else
-          dx >=0 ? tg = Float::INFINITY : -Float::INFINITY
+          tg = (dx >= 0) ? Float::INFINITY : -Float::INFINITY
         end
         direction.angle = to_deg(Math.atan(tg))
       end

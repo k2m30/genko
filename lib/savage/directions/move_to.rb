@@ -10,8 +10,8 @@ module Savage
         tx = ty = 0 if relative?
         transform_dot( target, scale_x, skew_x, skew_y, scale_y, tx, ty )
       end
-      def split(start_point, size)
-        self
+      def split(size)
+        [self]
       end
     end
   end

@@ -13,18 +13,18 @@ module Savage
         transform_dot(target, scale_x, skew_x, skew_y, scale_y, tx, ty)
       end
 
-      def length(start_point)
-        Math.sqrt((start_point.x-target.x)*(start_point.x-target.x)+(start_point.y-target.y)*(start_point.y-target.y))
+      def length
+        Math.sqrt((position.x-target.x)*(position.x-target.x)+(position.y-target.y)*(position.y-target.y))
       end
 
-      def split(start_point, size)
-        n = (self.length(start_point) / (size+1)).ceil
-        dx = (target.x-start_point.x)/n
-        dy = (target.y-start_point.y)/n
+      def split(size)
+        n = (self.length / (size+1)).ceil
+        dx = (target.x-position.x)/n
+        dy = (target.y-position.y)/n
 
         result = []
         n.times do |i|
-          result << Savage::Directions::LineTo.new(start_point.x + dx*(i+1), start_point.y + dy*(i+1))
+          result << Savage::Directions::LineTo.new(position.x + dx*(i+1), position.y + dy*(i+1))
         end
         result
       end

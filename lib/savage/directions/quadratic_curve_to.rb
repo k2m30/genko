@@ -20,24 +20,24 @@ module Savage
         end
       end
 
-      def split(start_point, size, last_curve_point=nil)
+      def split(size, last_curve_point=nil)
         n = 10
 
-        x0 = start_point.x
-        y0 = start_point.y
+        x0 = position.x
+        y0 = position.y
 
         if @control
           x1 = @control.x
           y1 = @control.y
         else
-          p start_point
+          p position
           p last_curve_point
-          x1 = 2 * start_point.x - last_curve_point.x
-          y1 = 2 * start_point.y - last_curve_point.y
+          x1 = 2 * position.x - last_curve_point.x
+          y1 = 2 * position.y - last_curve_point.y
         end
 
-        x2 = @target.x
-        y2 = @target.y
+        x2 = target.x
+        y2 = target.y
 
         dt = 1.0/n
         t = dt

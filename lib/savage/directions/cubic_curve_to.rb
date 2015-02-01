@@ -3,25 +3,25 @@ module Savage
     class CubicCurveTo < QuadraticCurveTo
       attr_accessor :control_1
 
-      def split(start_point, size, last_curve_point=nil)
+      def split(size, last_curve_point=nil)
         n = 10
 
-        x0 = start_point.x
-        y0 = start_point.y
+        x0 = position.x
+        y0 = position.y
 
         if @control_1
           x1 = @control_1.x
           y1 = @control_1.y
         else
-          x1 = 2 * start_point.x - last_curve_point.x
-          y1 = 2 * start_point.y - last_curve_point.y
+          x1 = 2 * position.x - last_curve_point.x
+          y1 = 2 * position.y - last_curve_point.y
         end
 
         x2 = control_2.x
         y2 = control_2.y
 
-        x3 = @target.x
-        y3 = @target.y
+        x3 = target.x
+        y3 = target.y
 
         dt = 1.0/n
         t = dt
