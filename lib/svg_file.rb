@@ -25,14 +25,13 @@ class SVGFile
     read_whole_path
     split
     make_tpath
-    # highlight_arris
+    highlight_arris
   end
 
   def highlight_arris
     # @tpath.calculate_angles!
     @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_angles!
-    pp @whole_path
   end
 
   def close_paths
@@ -118,10 +117,9 @@ class SVGFile
       subpath = Savage::SubPath.new
       subpath.directions = [tdirection]
       @tpath.subpaths << subpath
-
-      @tpath.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
-      @tpath.calculate_angles!
     end
+    @tpath.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
+    @tpath.calculate_angles!
   end
 
   def point_transform(point)

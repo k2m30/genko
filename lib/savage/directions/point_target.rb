@@ -17,6 +17,10 @@ module Savage
         [target.x, target.y]
       end
 
+      def length(x1,y1,x2,y2)
+        Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
+      end
+
     end
   end
 end

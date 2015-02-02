@@ -37,7 +37,8 @@ def split_colors(file_name)
 end
 
 # file_name = ARGV[0] || Dir.pwd + '/images/Domik.svg'
-file_name = ARGV[0] || Dir.pwd + '/images/butterfly.svg'
+# file_name = ARGV[0] || Dir.pwd + '/images/butterfly.svg'
+file_name = ARGV[0] || Dir.pwd + '/images/car.svg'
 tmp_files = split_colors(file_name)
 p tmp_files
 
