@@ -3,8 +3,8 @@ module Savage
     class CubicCurveTo < QuadraticCurveTo
       attr_accessor :control_1
 
-      def split(size, last_curve_point=nil)
-        n = 10
+      def split(size=50, last_curve_point=nil)
+        n = 4 #start number of pieces value
 
         x0 = position.x
         y0 = position.y
@@ -23,9 +23,31 @@ module Savage
         x3 = target.x
         y3 = target.y
 
+#### detecting proper differentiation value
+        max_length = nil
         dt = 1.0/n
         t = dt
 
+        begin
+          last_x = x0
+          last_y = y0
+          max_length = 0
+          n.times do
+            x = (1 - t) * (1 - t) * (1 - t) * x0 + 3 * t * (1 - t) * (1 - t) * x1 + 3 * t * t * (1 - t) * x2 + t * t * t * x3
+            y = (1 - t) * (1 - t) * (1 - t) * y0 + 3 * t * (1 - t) * (1 - t) * y1 + 3 * t * t * (1 - t) * y2 + t * t * t * y3
+            length = Math.sqrt((x-last_x)*(x-last_x)+(y-last_y)*(y-last_y))
+            max_length = length if length > max_length
+            t+=dt
+            last_x = x
+            last_y = y
+          end
+          n=(n*1.2).round
+          dt = 1.0/n
+          t = dt
+        end while max_length > size
+        p [n, max_length, size]
+
+####
         result = []
         (n-1).times do
           x = (1 - t) * (1 - t) * (1 - t) * x0 + 3 * t * (1 - t) * (1 - t) * x1 + 3 * t * t * (1 - t) * x2 + t * t * t * x3

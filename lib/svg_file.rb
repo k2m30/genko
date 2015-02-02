@@ -54,16 +54,21 @@ class SVGFile
       else
         new_directions = direction.split size
       end
-      subpath = Savage::SubPath.new
-      subpath.directions = new_directions
-      @splitted_path.subpaths << subpath
+
+      new_directions.each do |direction|
+        subpath = Savage::SubPath.new
+        subpath.directions = [direction]
+        @splitted_path.subpaths << subpath
+      end
+
+
     end
     @splitted_path.directions.flatten!
     @splitted_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @splitted_path.calculate_angles!
   end
 
-  def make_gcode_file file_name
+  def make_gcode_file(file_name)
     begin
       f = File.new file_name, 'w+'
       f.write "(#{@file_name})\n"
@@ -71,9 +76,7 @@ class SVGFile
       @properties.each_pair { |pair| f.write "(#{pair})\n" }
       f.write "%\n"
       #f.write "G51Y-1\n"
-      start_point = nil
-      @tpath.subpaths.first.directions.each do |direction|
-        next if direction.kind_of? Savage::Directions::ClosePath
+      @tpath.directions.each do |direction|
         x = (direction.target.x - @properties["initial_x"].to_f).round(2)
         y = (direction.target.y - @properties["initial_y"].to_f).round(2)
         case direction.command_code
@@ -86,7 +89,6 @@ class SVGFile
           else
             raise ArgumentError "Bad command in tpath #{direction.command_code}"
         end
-        start_point = direction.target
       end
       f.write "G00 Z0\n"
       f.write "G00 X0 Y0 Z0\n"
@@ -199,20 +201,22 @@ class SVGFile
   def save(file_name, path)
     dimensions = calculate_dimensions(path)
     output_file = SVG.new(dimensions[0]+10, dimensions[1]+10)
-    output_file.svg << output_file.marker("point", 6, 6)
+    output_file.marker('arrow-start', 8, 8, '<polyline points="0,0 8,4 0,8 2,4 0,0" stroke-width="1" stroke="darkred" fill="red"/>', -17, 4)
+    output_file.marker('arrow-end', 8, 8, '<polyline points="0,0 8,4 0,8 2,4 0,0" stroke-width="1" stroke="darkred" fill="red"/>', 25, 4)
+    output_file.style('path.stroke:hover {stroke-width: 9;}path.move_to:hover{stroke-width: 4;}')
     path.subpaths.each_with_index do |subpath, i|
       if subpath.directions.first.kind_of? Savage::Directions::MoveTo
         move_to_subpath = Savage::SubPath.new
         position = path.subpaths[i-1].directions.last.target
         target = subpath.directions.first.target
         move_to_subpath.directions = [Savage::Directions::MoveTo.new(position.x, position.y), Savage::Directions::LineTo.new(target.x, target.y)]
-        output_file.svg << output_file.path(move_to_subpath.to_command, 'red', 2)
+        output_file.svg << output_file.path(move_to_subpath.to_command, 'red', 2, 'none', 'move_to', 'url(#arrow-start)', 'url(#arrow-end)')
       else
         point = path.subpaths[i-1].directions.last.target
         subpath.directions.insert(0, Savage::Directions::MoveTo.new(point.x, point.y))
       end
 
-      output_file.svg << output_file.path(subpath.to_command, 'black', 15)
+      output_file.svg << output_file.path(subpath.to_command, 'black', 5)
 
     end
     output_file.save(file_name)

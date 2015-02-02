@@ -75,7 +75,7 @@ XML::Node 2 defs
 
   #2<style>
   def style(css)
-    @defs << XML::Node.new(:style, [:type, 'text/css']).set_CDATA("\n"+css+"\n")
+    @defs << XML::Node.new('style').set_text(css)
   end
 
   #2<pattern>
@@ -84,8 +84,8 @@ XML::Node 2 defs
   end
 
   #2<marker>
-  def marker(id, markerWidth, markerHeight, markerUnits = 'userSpaceOnUse', orient = 'auto', refX = 0, refY = 0)
-    @defs << XML::Node.new('marker') * [:id, id, :markerWidth, markerWidth, :markerHeight, markerHeight, :markerUnits, markerUnits, :orient, orient, :refX, refX, :refY, refY]
+  def marker(id, markerWidth, markerHeight, path, refX = 0, refY = 0, markerUnits = 'userSpaceOnUse', orient = 'auto')
+    @defs << XML::Node.new('marker').set_text(path) * [:id, id, :markerWidth, markerWidth, :markerHeight, markerHeight, :markerUnits, markerUnits, :orient, orient, :refX, refX, :refY, refY]
   end
 
   #<image>
@@ -145,8 +145,8 @@ XML::Node 2 defs
   end
 
   #<path>
-  def path(d, stroke, stroke_width, fill='none')
-    XML::Node.new('path') * [:d, d, :stroke, stroke, :"stroke-width", stroke_width, :fill, fill]
+  def path(d, stroke, stroke_width, fill='none', class_name='stroke', marker_start='none', marker_end='none')
+    XML::Node.new('path') * [:d, d, :stroke, stroke, :"stroke-width", stroke_width, :fill, fill, :class, class_name, :"marker-start", marker_start, :"marker-end", marker_end]
   end
 
   #<text>
