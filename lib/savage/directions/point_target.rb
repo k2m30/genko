@@ -21,6 +21,12 @@ module Savage
         Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
       end
 
+      def round!(n=2)
+        target.x=target.x.round(n)
+        target.y=target.y.round(n)
+        position.x = position.x.round(n)
+        position.y = position.y.round(n)
+      end
     end
   end
 end

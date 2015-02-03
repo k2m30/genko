@@ -100,8 +100,8 @@ XML::Node 2 defs
   end
 
   #<g>
-  def g(style = '')
-    XML::Node.new('g') * [:style, style]
+  def g(stroke='black', stroke_width=1, fill='none', class_name='stroke', marker_start='none', marker_end='none')
+    XML::Node.new('g') * [:stroke, stroke, :"stroke-width", stroke_width, :fill, fill, :class, class_name, :"marker-start", marker_start, :"marker-end", marker_end]
   end
 
   #2<radialGradient>
@@ -145,8 +145,8 @@ XML::Node 2 defs
   end
 
   #<path>
-  def path(d, stroke, stroke_width, fill='none', class_name='stroke', marker_start='none', marker_end='none')
-    XML::Node.new('path') * [:d, d, :stroke, stroke, :"stroke-width", stroke_width, :fill, fill, :class, class_name, :"marker-start", marker_start, :"marker-end", marker_end]
+  def path(d)
+    XML::Node.new('path') * [:d, d]
   end
 
   #<text>

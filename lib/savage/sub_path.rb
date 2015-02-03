@@ -26,9 +26,9 @@ module Savage
     end
 
     def to_command
-      @directions.to_enum(:each_with_index).collect { |dir, i|
+      @directions.to_enum(:each_with_index).collect { |dir|
         dir.to_command
-      }.join
+      }.join(' ')
     end
 
     def commands

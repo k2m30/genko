@@ -201,23 +201,32 @@ class SVGFile
 
   def save(file_name, path)
     dimensions = calculate_dimensions(path)
+
     output_file = SVG.new(dimensions[0]+10, dimensions[1]+10)
     output_file.marker('arrow-start', 8, 8, '<polyline points="0,0 8,4 0,8 2,4 0,0" stroke-width="1" stroke="darkred" fill="red"/>', -17, 4)
     output_file.marker('arrow-end', 8, 8, '<polyline points="0,0 8,4 0,8 2,4 0,0" stroke-width="1" stroke="darkred" fill="red"/>', 25, 4)
-    output_file.style('path.stroke:hover {stroke-width: 9;}path.move_to:hover{stroke-width: 4;}')
+    output_file.style('g.stroke path:hover {stroke-width: 9;}g.move_to path:hover{stroke-width: 4;}')
+
+    path_group = output_file.g
+
     path.subpaths.each_with_index do |subpath, i|
       if subpath.directions.first.kind_of? Savage::Directions::MoveTo
+        output_file.svg << path_group
+
         move_to_subpath = Savage::SubPath.new
         position = path.subpaths[i-1].directions.last.target
         target = subpath.directions.first.target
         move_to_subpath.directions = [Savage::Directions::MoveTo.new(position.x, position.y), Savage::Directions::LineTo.new(target.x, target.y)]
-        output_file.svg << output_file.path(move_to_subpath.to_command, 'red', 2, 'none', 'move_to', 'url(#arrow-start)', 'url(#arrow-end)')
+        output_file.svg << output_file.g('red', 2, 'none', 'move_to', 'url(#arrow-start)', 'url(#arrow-end)') << output_file.path(move_to_subpath.to_command)
+
+        path_group = output_file.g('black', 5)
       else
         point = path.subpaths[i-1].directions.last.target
         subpath.directions.insert(0, Savage::Directions::MoveTo.new(point.x, point.y))
+        path_group << output_file.path(subpath.to_command)
       end
 
-      output_file.svg << output_file.path(subpath.to_command, 'black', 5)
+
 
     end
     output_file.save(file_name)

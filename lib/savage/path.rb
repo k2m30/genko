@@ -103,6 +103,7 @@ module Savage
         break if next_direction.nil?
         next_direction.position = direction.target
       end
+      directions.each { |d| d.round!(2)}
     end
 
     def length
@@ -142,7 +143,7 @@ module Savage
     end
 
     def to_command
-      @subpaths.collect { |subpath| subpath.to_command }.join
+      @subpaths.collect { |subpath| subpath.to_command }.join(' ')
     end
 
     def transform(*args)
