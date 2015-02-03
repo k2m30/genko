@@ -2,7 +2,7 @@ module Savage
   module Directions
     class PointTarget < Direction
 
-      attr_accessor :target, :position
+      attr_accessor :target, :position, :rate
 
       def initialize(x, y, absolute=true)
         @target = Point.new(x,y)

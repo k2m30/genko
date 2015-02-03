@@ -105,6 +105,16 @@ module Savage
       end
     end
 
+    def length
+      length_g00 = 0
+      length_g01 = 0
+      directions.each do |direction|
+        length_g00 += direction.length/direction.rate if direction.kind_of? Savage::Directions::MoveTo
+        length_g01 += direction.length/direction.rate if direction.kind_of? Savage::Directions::LineTo
+      end
+      {length_g00: length_g00, length_g01: length_g01}
+    end
+
     def calculate_angles!
       directions.each do |direction|
         dx = direction.target.x - direction.position.x

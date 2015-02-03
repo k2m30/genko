@@ -20,21 +20,21 @@ class SVGFile
     @file_name = file_name
     read_svg @file_name
     absolute!
-    close_paths
-    read_properties
-    read_whole_path
-    split
-    make_tpath
-    highlight_arris
+    close_paths!
+    read_properties!
+    read_whole_path!
+    split!
+    make_tpath!
+    highlight_arris!
   end
 
-  def highlight_arris
+  def highlight_arris!
     # @tpath.calculate_angles!
     @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_angles!
   end
 
-  def close_paths
+  def close_paths!
     @paths.each do |path|
       path.subpaths.each do |subpath|
         if subpath.directions.last.kind_of? Savage::Directions::ClosePath
@@ -45,7 +45,7 @@ class SVGFile
     end
   end
 
-  def split
+  def split!
     size = @properties['max_segment_length']
     @whole_path.directions.each_with_index do |direction, i|
       if %w[S s T t].include? direction.command_code # smooth curves need second control point of previous curve
@@ -55,6 +55,7 @@ class SVGFile
       end
 
       new_directions.each do |direction|
+        direction.rate = 1.0
         subpath = Savage::SubPath.new
         subpath.directions = [direction]
         @splitted_path.subpaths << subpath
@@ -65,6 +66,7 @@ class SVGFile
     @splitted_path.directions.flatten!
     @splitted_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @splitted_path.calculate_angles!
+    p @splitted_path.length
   end
 
   def make_gcode_file(file_name)
@@ -105,14 +107,14 @@ class SVGFile
     @paths.each(&:absolute!)
   end
 
-  def make_tpath
+  def make_tpath!
     path = @splitted_path.clone
     path.directions.each do |direction|
       tdirection = direction.clone
       tdirection.position = point_transform(direction.position)
       tdirection.target = point_transform(direction.target)
 
-      tdirection.rate = tdirection.length / direction.length if direction.command_code == 'L'
+      tdirection.rate = tdirection.length / direction.length
 
       subpath = Savage::SubPath.new
       subpath.directions = [tdirection]
@@ -120,6 +122,7 @@ class SVGFile
     end
     @tpath.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @tpath.calculate_angles!
+    p @tpath.length
   end
 
   def point_transform(point)
@@ -179,11 +182,11 @@ class SVGFile
     @height = svg.at_css('svg')[:height].to_f
   end
 
-  def read_properties
+  def read_properties!
     @properties = File.open("properties.yml") { |yf| YAML::load(yf) }
   end
 
-  def read_whole_path
+  def read_whole_path!
     @paths.each do |path|
       path.subpaths.each do |subpath|
         subpath.directions.each_with_index do |direction, i|

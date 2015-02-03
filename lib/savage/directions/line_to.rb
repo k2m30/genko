@@ -1,7 +1,7 @@
 module Savage
   module Directions
     class LineTo < PointTarget
-      attr_accessor :rate
+
 
       def command_code
         (absolute?) ? 'L' : 'l'

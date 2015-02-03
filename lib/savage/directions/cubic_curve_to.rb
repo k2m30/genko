@@ -50,7 +50,6 @@ module Savage
             last_y = y
           end
         end while max_length > size
-        p [n, max_length, size]
 
 ####
         dt = 1.0/n

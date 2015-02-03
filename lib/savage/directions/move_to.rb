@@ -13,6 +13,11 @@ module Savage
       def split(size)
         [self]
       end
+
+      def length
+        Math.sqrt((position.x-target.x)*(position.x-target.x)+(position.y-target.y)*(position.y-target.y))
+      end
+
     end
   end
 end
