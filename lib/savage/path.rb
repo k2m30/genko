@@ -84,10 +84,8 @@ module Savage
 
     #absolute
 
-    def initialize(*args)
-      @subpaths = [SubPath.new]
-      @subpaths.last.move_to(*args) if (2..3).include?(*args.length)
-      yield self if block_given?
+    def initialize()
+      @subpaths = []
     end
 
     def directions
@@ -116,7 +114,7 @@ module Savage
         length_g00 += direction.length/direction.rate if direction.kind_of? Directions::MoveTo
         length_g01 += direction.length/direction.rate if direction.kind_of? Directions::LineTo
       end
-      {length_g00: length_g00, length_g01: length_g01}
+      {length_g00: length_g00.round, length_g01: length_g01.round}
     end
 
     def calculate_angles!

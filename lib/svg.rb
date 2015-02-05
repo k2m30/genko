@@ -150,8 +150,8 @@ XML::Node 2 defs
   end
 
   #<text>
-  def text(str = '', p = nil, style = '')
-    (p.nil?) ? XML::Node.new('text').set_text(str) * [:style, style] : XML::Node.new('text').set_text(str) * [:x, p.x, :y, p.y, :style, style]
+  def text(str, x, y, style = '')
+    XML::Node.new('text').set_text(str) * [:x, x, :y, y, :style, style]
   end
 
   #<tspan>

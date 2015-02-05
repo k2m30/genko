@@ -10,15 +10,8 @@ class SVGFile
 
   def initialize(file_name)
     @allowed_elements = ['path']
-    @paths = []
-    @whole_path = Savage::Path.new
-    @tpath = Savage::Path.new
-    @splitted_path = Savage::Path.new
-    @arris_highlighted_path = Savage::Path.new
-    @elements = []
-    @properties = {}
-    @file_name = file_name
-    read_svg @file_name
+
+    read_svg file_name
     absolute!
     close_paths!
     read_properties!
@@ -30,8 +23,8 @@ class SVGFile
 
   def highlight_arris!
     # @tpath.calculate_angles!
-    @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
-    @whole_path.calculate_angles!
+    # @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
+    # @whole_path.calculate_angles!
   end
 
   def close_paths!
@@ -46,6 +39,7 @@ class SVGFile
   end
 
   def split!
+    @splitted_path = Savage::Path.new
     size = @properties['max_segment_length']
     @whole_path.directions.each_with_index do |direction, i|
       if %w[S s T t].include? direction.command_code # smooth curves need second control point of previous curve
@@ -62,11 +56,6 @@ class SVGFile
 
     @splitted_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @splitted_path.calculate_angles!
-
-    # @splitted_path
-    # pp @splitted_path.subpaths
-    # p @splitted_path.subpaths.size
-    # p @splitted_path.directions.size
   end
 
   def make_gcode_file(file_name)
@@ -108,6 +97,7 @@ class SVGFile
   end
 
   def make_tpath!
+    @tpath = Savage::Path.new
     path = @splitted_path.clone
     path.directions.each do |direction|
       tdirection = direction.clone
@@ -122,7 +112,9 @@ class SVGFile
     end
     @tpath.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @tpath.calculate_angles!
-    p @tpath.length
+    l = @tpath.length
+    @properties[:g00] = l[:length_g00]
+    @properties[:g01] = l[:length_g01]
   end
 
   def point_transform(point)
@@ -170,11 +162,13 @@ class SVGFile
   end
 
   def read_svg(file_name)
+    @paths = []
+    elements = []
     svg = Nokogiri::XML open file_name
     svg.traverse do |e|
-      @elements.push e if e.element? && @allowed_elements.include?(e.name)
+      elements.push e if e.element? && @allowed_elements.include?(e.name)
     end
-    @elements.map do |e|
+    elements.map do |e|
       @paths.push e.attribute_nodes.select { |a| a.name == 'd' }
     end
     @paths.flatten!.map!(&:value).map! { |path| Savage::Parser.parse path }
@@ -187,15 +181,17 @@ class SVGFile
   end
 
   def read_whole_path!
+    @whole_path = Savage::Path.new
+    @whole_path.subpaths = []
     @paths.each do |path|
       path.subpaths.each do |subpath|
         new_subpath = Savage::SubPath.new
         new_subpath.directions = subpath.directions
-        new_subpath.directions.delete_if {|d| d.is_a?(Savage::Directions::ClosePath)}
+        new_subpath.directions.delete_if { |d| d.is_a?(Savage::Directions::ClosePath) }
         @whole_path.subpaths << new_subpath
       end
     end
-    @whole_path.optimize!(@properties['initial_x'], @properties['initial_y'])
+    # @whole_path.optimize!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.subpaths.last.directions << Savage::Directions::MoveTo.new(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_angles!
@@ -230,6 +226,12 @@ class SVGFile
       end
 
 
+    end
+    # g00 = @tpath.length[:length_g00]
+    begin
+      output_file.svg << output_file.text("Idling: #{@properties[:g00]}mm, Painting: #{@properties[:g01]}mm", 15, 15)
+    rescue => e
+      p "failed #{file_name}"
     end
     output_file.save(file_name)
     print "Saved to #{file_name}\n"
