@@ -4,5 +4,5 @@ ff_velocity : 16000.0
 max_segment_length : 10
 initial_x : 50.0
 initial_y : 50.0
-dx : 60.0
-dy : 134.0
+dx : 0
+dy : 0

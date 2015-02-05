@@ -97,7 +97,7 @@ module Savage
     end
 
     def calculate_start_points!(initial_x = 0, initial_y = 0)
-      directions.first.position = Savage::Directions::Point.new initial_x, initial_y
+      directions.first.position = Point.new initial_x, initial_y
       directions.each_with_index do |direction, i|
         next_direction = directions[i+1]
         break if next_direction.nil?
@@ -110,8 +110,8 @@ module Savage
       length_g00 = 0
       length_g01 = 0
       directions.each do |direction|
-        length_g00 += direction.length/direction.rate if direction.kind_of? Savage::Directions::MoveTo
-        length_g01 += direction.length/direction.rate if direction.kind_of? Savage::Directions::LineTo
+        length_g00 += direction.length/direction.rate if direction.kind_of? Directions::MoveTo
+        length_g01 += direction.length/direction.rate if direction.kind_of? Directions::LineTo
       end
       {length_g00: length_g00, length_g01: length_g01}
     end
@@ -163,6 +163,12 @@ module Savage
 
     def fully_transformable?
       subpaths.all? &:fully_transformable?
+    end
+
+    def optmize!
+      ds = subpaths.first.directions
+      subpaths << SubPath.new
+      subpaths.last.directions
     end
 
     private
