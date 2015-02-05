@@ -54,19 +54,19 @@ class SVGFile
         new_directions = direction.split size
       end
 
-      new_directions.each do |direction|
-        direction.rate = 1.0
-        subpath = Savage::SubPath.new
-        subpath.directions = [direction]
-        @splitted_path.subpaths << subpath
-      end
-
+      subpath = Savage::SubPath.new
+      subpath.directions = new_directions
+      @splitted_path.subpaths << subpath
 
     end
-    @splitted_path.directions.flatten!
+
     @splitted_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @splitted_path.calculate_angles!
-    p @splitted_path.directions.size
+
+    # @splitted_path
+    # pp @splitted_path.subpaths
+    # p @splitted_path.subpaths.size
+    # p @splitted_path.directions.size
   end
 
   def make_gcode_file(file_name)
@@ -189,15 +189,17 @@ class SVGFile
   def read_whole_path!
     @paths.each do |path|
       path.subpaths.each do |subpath|
-        subpath.directions.each do |direction|
-          @whole_path.subpaths.first.directions << direction unless direction.kind_of? Savage::Directions::ClosePath
-        end
+        new_subpath = Savage::SubPath.new
+        new_subpath.directions = subpath.directions
+        new_subpath.directions.delete_if {|d| d.is_a?(Savage::Directions::ClosePath)}
+        @whole_path.subpaths << new_subpath
       end
     end
-    @whole_path.subpaths.first.directions << Savage::Directions::MoveTo.new(@properties['initial_x'], @properties['initial_y'])
+    @whole_path.optimize!(@properties['initial_x'], @properties['initial_y'])
+    @whole_path.subpaths.last.directions << Savage::Directions::MoveTo.new(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_angles!
-    @whole_path.subpaths.first.directions.delete_if { |d| (d.is_a?(Savage::Directions::MoveTo) || d.is_a?(Savage::Directions::LineTo)) && d.length==0 }
+
   end
 
   def save(file_name, path)

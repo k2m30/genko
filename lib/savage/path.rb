@@ -103,7 +103,10 @@ module Savage
         break if next_direction.nil?
         next_direction.position = direction.target
       end
-      directions.each { |d| d.round!(2)}
+      directions.each(&:round!)
+      subpaths.each do |subpath|
+        subpath.directions.delete_if { |d| (d.is_a?(Directions::MoveTo) || d.is_a?(Directions::LineTo)) && d.length==0 }
+      end
     end
 
     def length
@@ -154,7 +157,7 @@ module Savage
     end
 
     # Public: make commands within transformable commands
-    #         H/h/V/v is considered not 'transformable'
+    #         H/h/V/v are considered not 'transformable'
     #         because when they are rotated, they will
     #         turn into other commands
     def to_transformable_commands!
@@ -165,15 +168,39 @@ module Savage
       subpaths.all? &:fully_transformable?
     end
 
-    def optmize!
-      ds = subpaths.first.directions
-      subpaths << SubPath.new
-      subpaths.last.directions
+    def optimize!(initial_x = 0, initial_y = 0)
+      subpaths.delete_if {|s| s.directions.empty?}
+      point = Directions::Point.new initial_x, initial_y
+      optimized_subpaths = []
+
+      until subpaths.empty?
+        closest = find_closest(point, subpaths)
+        optimized_subpaths << closest
+        subpaths.delete(closest)
+        point = closest.directions.last.target
+      end
+
+      self.subpaths = optimized_subpaths
     end
 
     private
     def to_deg(angle)
       angle * 180 / Math::PI
+    end
+
+    def find_closest(point, sbths)
+      closest_distance = Float::INFINITY
+      closest_path = nil
+      sbths.each do |subpath|
+        target = subpath.directions.first.target
+        distance = Math.sqrt((target.x-point.x)*(target.x-point.x) + (target.y-point.y)*(target.y-point.y))
+
+        if distance < closest_distance
+          closest_path = subpath
+          closest_distance = distance
+        end
+      end
+      closest_path
     end
 
   end
