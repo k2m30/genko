@@ -191,7 +191,7 @@ class SVGFile
         @whole_path.subpaths << new_subpath
       end
     end
-    # @whole_path.optimize!(@properties['initial_x'], @properties['initial_y'])
+    @whole_path.optimize!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.subpaths.last.directions << Savage::Directions::MoveTo.new(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
     @whole_path.calculate_angles!
