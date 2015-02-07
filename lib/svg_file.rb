@@ -92,10 +92,6 @@ class SVGFile
 
   end
 
-  def absolute!
-    @paths.each(&:absolute!)
-  end
-
   def make_tpath!
     @tpath = Savage::Path.new
     path = @splitted_path.clone
@@ -115,50 +111,6 @@ class SVGFile
     l = @tpath.length
     @properties[:g00] = l[:length_g00]
     @properties[:g01] = l[:length_g01]
-  end
-
-  def point_transform(point)
-    w = @properties["canvas_size_x"]
-
-    x = point.x
-    y = point.y
-    lx = Math.sqrt(x*x + y*y)
-
-    x = point.x
-    y = point.y
-    ly = Math.sqrt((w-x)*(w-x) + y*y)
-
-    Savage::Directions::Point.new lx, ly
-  end
-
-
-  def point_to_triangle(x, y)
-    dx = @properties["dx"]
-    dy = @properties["dy"]
-    w = @properties["canvas_size_x"]
-
-    x = x - dx/2
-    y = y - dy
-    lx = Math.sqrt(x*x + y*y)
-    x = x + dx
-    ly = Math.sqrt((w-x)*(w-x) + y*y)
-
-    [lx - @properties["initial_x"], ly - @properties["initial_y"]]
-  end
-
-  def tpoint_to_decart(lx, ly)
-    dx = @properties["dx"]
-    dy = @properties["dy"]
-    w = @properties["canvas_size_x"]
-
-    lx += @properties["initial_x"]
-    ly += @properties["initial_y"]
-
-
-    x = ((lx*lx - ly*ly + w*w - w * dx)/(2*(w-dx)))
-    y = (Math.sqrt(lx*lx - (x-dx/2)*(x-dx/2))+dy)
-
-    [x, y]
   end
 
   def read_svg(file_name)
@@ -216,20 +168,20 @@ class SVGFile
         position = path.subpaths[i-1].directions.last.target
         target = subpath.directions.first.target
         move_to_subpath.directions = [Savage::Directions::MoveTo.new(position.x, position.y), Savage::Directions::LineTo.new(target.x, target.y)]
-        output_file.svg << output_file.g('red', 2, 'none', 'move_to', 'url(#arrow-start)', 'url(#arrow-end)') << output_file.path(move_to_subpath.to_command)
+        output_file.svg << output_file.g('red', 2, 'none', 'move_to', 'url(#arrow-start)', 'url(#arrow-end)') << output_file.path(move_to_subpath.to_command, "path_#{i}")
 
         path_group = output_file.g('black', 3)
       else
         point = path.subpaths[i-1].directions.last.target
         subpath.directions.insert(0, Savage::Directions::MoveTo.new(point.x, point.y))
-        path_group << output_file.path(subpath.to_command)
+        path_group << output_file.path(subpath.to_command, "path_#{i}")
       end
 
 
     end
     # g00 = @tpath.length[:length_g00]
     begin
-      output_file.svg << output_file.text("Idling: #{@properties[:g00]}mm, Painting: #{@properties[:g01]}mm", 15, 15)
+      output_file.svg << output_file.text("Холостой ход: #{@properties[:g00]}mm, Рисование: #{@properties[:g01]}mm", 15, 15)
     rescue => e
       p "failed #{file_name}"
     end
@@ -238,6 +190,10 @@ class SVGFile
   end
 
   private
+  def absolute!
+    @paths.each(&:absolute!)
+  end
+
   def calculate_dimensions(path)
     height = width = 0
     path.directions.each do |direction|
@@ -254,4 +210,49 @@ class SVGFile
       start_point = direction.target
     end
   end
+
+  def point_transform(point)
+    w = @properties["canvas_size_x"]
+
+    x = point.x
+    y = point.y
+    lx = Math.sqrt(x*x + y*y)
+
+    x = point.x
+    y = point.y
+    ly = Math.sqrt((w-x)*(w-x) + y*y)
+
+    Savage::Directions::Point.new lx, ly
+  end
+
+  def point_to_triangle(x, y)
+    dx = @properties["dx"]
+    dy = @properties["dy"]
+    w = @properties["canvas_size_x"]
+
+    x = x - dx/2
+    y = y - dy
+    lx = Math.sqrt(x*x + y*y)
+    x = x + dx
+    ly = Math.sqrt((w-x)*(w-x) + y*y)
+
+    [lx - @properties["initial_x"], ly - @properties["initial_y"]]
+  end
+
+  def tpoint_to_decart(lx, ly)
+    dx = @properties["dx"]
+    dy = @properties["dy"]
+    w = @properties["canvas_size_x"]
+
+    lx += @properties["initial_x"]
+    ly += @properties["initial_y"]
+
+
+    x = ((lx*lx - ly*ly + w*w - w * dx)/(2*(w-dx)))
+    y = (Math.sqrt(lx*lx - (x-dx/2)*(x-dx/2))+dy)
+
+    [x, y]
+  end
+
+
 end

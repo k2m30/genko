@@ -145,8 +145,8 @@ XML::Node 2 defs
   end
 
   #<path>
-  def path(d)
-    XML::Node.new('path') * [:d, d]
+  def path(d, id=nil)
+    XML::Node.new('path') * [:d, d, :id, id]
   end
 
   #<text>
