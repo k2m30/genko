@@ -1,8 +1,8 @@
-canvas_size_x : 1200.0
-linear_velocity : 12000.0
-ff_velocity : 16000.0
+canvas_size_x : 1775.0
+linear_velocity : 30000.0
+ff_velocity : 30000.0
 max_segment_length : 10
-initial_x : 50.0
-initial_y : 50.0
+initial_x : 2000.0
+initial_y : 2000.0
 dx : 0
 dy : 0

@@ -8,13 +8,13 @@ class SVGFile
 
   COLORS = %w[red yellow green white black grey blue]
 
-  def initialize(file_name)
+  def initialize(file_name, properties_file_name = 'properties.yml')
     @allowed_elements = ['path']
 
     read_svg file_name
     absolute!
     close_paths!
-    read_properties!
+    read_properties! properties_file_name
     read_whole_path!
     split!
     make_tpath!
@@ -43,7 +43,7 @@ class SVGFile
     size = @properties['max_segment_length']
     @whole_path.directions.each_with_index do |direction, i|
       if %w[S s T t].include? direction.command_code # smooth curves need second control point of previous curve
-        new_directions = direction.split size, @whole_path.subpaths.first.directions[i-1].control_2
+        new_directions = direction.split size, @whole_path.directions[i-1].control_2
       else
         new_directions = direction.split size
       end
@@ -66,16 +66,17 @@ class SVGFile
       @properties.each_pair { |pair| f.write "(#{pair})\n" }
       f.write "%\n"
       #f.write "G51Y-1\n"
-      @tpath.directions.each do |direction|
+      directions = @tpath.directions
+      directions.each_with_index do |direction, i|
         x = (direction.target.x - @properties["initial_x"].to_f).round(2)
         y = (direction.target.y - @properties["initial_y"].to_f).round(2)
         case direction.command_code
           when 'M'
-            f.write "G00 Z0\n"
-            f.write "G00 X#{x} Y#{y} Z0\n"
+            f.write "G00 Z0\n" unless direction.position.nil?
+            f.write "G00 X#{x} Y#{y} Z0\n" unless direction.position.nil?
           when 'L'
             feed = (@properties["linear_velocity"] * direction.rate).round(2)
-            f.write "G01 X#{x} Y#{y} Z12 F#{feed}\n"
+            f.write "G01 X#{x} Y#{y} Z10 F#{feed}\n"
           else
             raise ArgumentError "Bad command in tpath #{direction.command_code}"
         end
@@ -128,8 +129,8 @@ class SVGFile
     @height = svg.at_css('svg')[:height].to_f
   end
 
-  def read_properties!
-    @properties = File.open("properties.yml") { |yf| YAML::load(yf) }
+  def read_properties!(file_name)
+    @properties = File.open(file_name) { |yf| YAML::load(yf) }
   end
 
   def read_whole_path!
