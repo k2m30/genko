@@ -88,6 +88,19 @@ module Savage
       @subpaths = []
     end
 
+    def crop!(x, y, w, h)
+      @subpaths.each do |subpath|
+        subpath.directions.each do |direction|
+          p = direction.position
+          t = direction.target
+
+          if p.x < x || p.y < y || t.x < x || t.y < y || p.x > w + x || p.y > h + y || t.x > w + x || t.y > h + y
+            subpath.directions.delete(direction) unless direction.is_a? Directions::MoveTo
+          end
+        end
+      end
+    end
+
     def directions
       directions = []
       @subpaths.each { |subpath| directions.concat(subpath.directions) }
@@ -167,7 +180,7 @@ module Savage
     end
 
     def optimize!(initial_x = 0, initial_y = 0)
-      subpaths.delete_if {|s| s.directions.empty?}
+      subpaths.delete_if { |s| s.directions.empty? }
       point = Directions::Point.new initial_x, initial_y
       optimized_subpaths = []
 

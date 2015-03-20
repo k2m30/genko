@@ -55,6 +55,7 @@ class SVGFile
     end
 
     @splitted_path.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
+    # @splitted_path.crop!(@properties['crop_x'], @properties['crop_y'], @properties['crop_w'], @properties['crop_h'])
     @splitted_path.calculate_angles!
   end
 
@@ -180,12 +181,7 @@ class SVGFile
 
 
     end
-    # g00 = @tpath.length[:length_g00]
-    begin
-      output_file.svg << output_file.text("Холостой ход: #{@properties[:g00]}mm, Рисование: #{@properties[:g01]}mm", 15, 15)
-    rescue => e
-      p "failed #{file_name}"
-    end
+    output_file.svg << output_file.text("Холостой ход: #{@properties[:g00]}mm, Рисование: #{@properties[:g01]}mm", 15, 15)
     output_file.save(file_name)
     print "Saved to #{file_name}\n"
   end
