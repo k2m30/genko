@@ -47,12 +47,12 @@ tmp_files.each_with_index do |name, i|
   svg_file = SVG.new(name)
   new_name = "./result/0#{i.next}_#{name.gsub('.svg', '')}"
 
-  SVG.save("#{new_name}_splitted.svg", svg_file.splitted_paths)
-  SVG.save("#{new_name}_simplified.svg", svg_file.paths)
+  svg_file.save("#{new_name}_splitted.svg", svg_file.splitted_paths)
+  svg_file.save("#{new_name}_simplified.svg", svg_file.paths)
   # SVG.save("#{new_name}_simplified.svg", [svg_file.arris_highlighted_path])
 
-  SVG.save("#{new_name}_result.svg", svg_file.tpaths)
-  SVG.make_gcode_file("#{new_name + '.gcode'}", svg_file.properties, svg_file.tpaths)
+  svg_file.save("#{new_name}_result.svg", svg_file.tpaths)
+  svg_file.make_gcode_file("#{new_name + '.gcode'}", svg_file.properties, svg_file.tpaths)
 end
 
 tmp_files.each do |file|
