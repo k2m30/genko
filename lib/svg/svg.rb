@@ -27,10 +27,18 @@ class SVG
           '-//W3C//DTD SVG 1.1//EN',
           'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'
       )
-      xml.svg(version: '1.1', xmlns: 'http://www.w3.org/2000/svg', 'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
-              x: 0, y: 0, width: dimensions[2], height: dimensions[3], viewBox: "0, 0, #{dimensions[2]}, #{dimensions[3]}") {
-        xml.marker(id: 'arrow-end', markerWidth: 8, markerHeight: 8, refX: '2%', refY: 4, markerUnits: 'userSpaceOnUse', orient: 'auto') {
-          xml.polyline(points: '0,0 8,4 0,8 2,4 0,0', 'stroke-width' => 1, stroke: 'darkred', fill: 'red')
+      xml.svg(version: '1.1',
+              xmlns: 'http://www.w3.org/2000/svg',
+              'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
+              x: 0, y: 0,
+              width: dimensions[2], height: dimensions[3],
+              viewBox: "0, 0, #{dimensions[2]}, #{dimensions[3]}") {
+        xml.marker(id: 'arrow-end',
+                   markerWidth: 8, markerHeight: 8,
+                   refX: '2%', refY: 4,
+                   markerUnits: 'userSpaceOnUse', orient: 'auto') {
+          xml.polyline(points: '0,0 8,4 0,8 2,4 0,0',
+                       'stroke-width' => 1, stroke: 'darkred', fill: 'red')
         }
         xml.style 'g.stroke path:hover {stroke-width: 2;}'
         xml.style 'g.move_to path:hover{stroke-width: 2;}'
@@ -117,8 +125,6 @@ class SVG
   end
 
   private
-
-
   def optimize
     point = Point.new @properties['initial_x'], @properties['initial_y']
     optimized_paths = []

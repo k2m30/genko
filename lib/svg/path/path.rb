@@ -48,6 +48,7 @@ class Path
       directions[-1].start = start_point
     end
     @finish = directions.last.finish
+    self.d
     self
   end
 
@@ -106,12 +107,12 @@ class Path
   class << self
     def parse(d)
       raise TypeError unless d.is_a? String
-      subpaths = extract_subpaths d
+      subpaths = extract_subpaths(d).map { |subpath| parse_subpath subpath }
       raise TypeError if subpaths.empty?
       paths = []
-      subpaths.each do |subpath|
-        next_path = parse_subpath(subpath).organize!
-        paths << next_path
+      subpaths.each_with_index do |subpath, i|
+        start_point = i.zero? ? nil : subpaths[i-1].directions.last.finish
+        paths << subpath.organize!(start_point)
       end
       paths
     end

@@ -6,7 +6,6 @@ require_relative 'lib/svg/svg'
 COLORS = %w[red yellow green white black grey blue]
 
 def include_color?(value)
-  # require 'pry'; binding.pry
   COLORS.map { |color| value.include? color }.any?
 end
 
@@ -36,7 +35,7 @@ def split_colors(file_name)
 end
 
 file_name = ARGV[0] || Dir.pwd + '/images/hare_1775.svg'
-# file_name = ARGV[0] || Dir.pwd + '/images/calibrate.svg'
+# file_name = ARGV[0] || Dir.pwd + '/images/Domik.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/fill.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/risovaka007_003.svg'
 tmp_files = split_colors(file_name)
