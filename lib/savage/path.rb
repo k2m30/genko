@@ -108,7 +108,7 @@ module Savage
     end
 
     def calculate_start_points!(initial_x = 0, initial_y = 0)
-      directions.first.position = Point.new initial_x, initial_y
+      directions.first.position = Directions::Point.new initial_x, initial_y
       directions.each_with_index do |direction, i|
         next_direction = directions[i+1]
         break if next_direction.nil?
