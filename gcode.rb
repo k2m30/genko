@@ -1,8 +1,7 @@
 require 'pp'
 
-require_relative 'lib/svg'
-require_relative 'lib/savage'
-require_relative 'lib/svg_file'
+# require_relative 'lib/svg_file'
+require_relative 'lib/svg/svg'
 
 COLORS = %w[red yellow green white black grey blue]
 
@@ -45,15 +44,15 @@ p tmp_files
 Dir.mkdir('result') unless Dir.exists?('result')
 
 tmp_files.each_with_index do |name, i|
-  svg_file = SVGFile.new(name)
+  svg_file = SVG.new(name)
   new_name = "./result/0#{i.next}_#{name.gsub('.svg', '')}"
 
-  svg_file.save("#{new_name}_splitted.svg", svg_file.splitted_path)
-  svg_file.save("#{new_name}_simplified.svg", svg_file.whole_path)
+  SVG.save("#{new_name}_splitted.svg", svg_file.splitted_paths)
+  SVG.save("#{new_name}_simplified.svg", svg_file.paths)
   # svg_file.save("#{new_name}_simplified.svg", [svg_file.arris_highlighted_path])
 
-  svg_file.save("#{new_name}_result.svg", svg_file.tpath)
-  svg_file.make_gcode_file("#{new_name + '.gcode'}")
+  # SVG.save("#{new_name}_result.svg", svg_file.tpath)
+  # svg_file.make_gcode_file("#{new_name + '.gcode'}")
 end
 
 tmp_files.each do |file|
