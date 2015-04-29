@@ -12,6 +12,7 @@ class SVG
     read_svg file_name
     read_properties properties_file_name
     split @properties['max_segment_length']
+    make_tpath
 
   end
 
@@ -40,35 +41,21 @@ class SVG
     elements.map do |e|
       @paths.push e.attribute_nodes.select { |a| a.name == 'd' }
     end
-    @paths.flatten!.map!(&:value).map! { |path| Path.parse path }#.flatten!
+    @paths.flatten!.map!(&:value).map! { |path| Path.parse path } #.flatten!
     @width = svg.at_css('svg')[:width].to_f
     @height = svg.at_css('svg')[:height].to_f
   end
 
-  def tpath!
-    @splitted_paths.each { |path| @tpaths << path.tpath(size) }
-  end
-
-  def make_tpath!
-    @tpath = Savage::Path.new
-    path = @splitted_path.clone
-    path.directions.each do |direction|
-      tdirection = direction.clone
-      tdirection.position = point_transform(direction.position)
-      tdirection.target = point_transform(direction.target)
-
-      tdirection.rate = tdirection.length / direction.length
-
-      subpath = Savage::SubPath.new
-      subpath.directions = [tdirection]
-      @tpath.subpaths << subpath
+  def make_tpath
+    @splitted_paths.each do |path|
+      subpaths = []
+      path.each do |subpath|
+        subpaths << TPath.new(subpath, @properties['canvas_size_x']).tpath
+      end
+      @tpaths << subpaths
     end
-    @tpath.calculate_start_points!(@properties['initial_x'], @properties['initial_y'])
-    @tpath.calculate_angles!
-    l = @tpath.length
-    @properties[:g00] = l[:length_g00]
-    @properties[:g01] = l[:length_g01]
   end
+
 
   class << self
 

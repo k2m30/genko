@@ -1,6 +1,6 @@
 require 'pp'
 
-# require_relative 'lib/svg_file'
+require_relative 'lib/tpath'
 require_relative 'lib/svg/svg'
 
 COLORS = %w[red yellow green white black grey blue]
@@ -49,9 +49,9 @@ tmp_files.each_with_index do |name, i|
 
   SVG.save("#{new_name}_splitted.svg", svg_file.splitted_paths)
   SVG.save("#{new_name}_simplified.svg", svg_file.paths)
-  # svg_file.save("#{new_name}_simplified.svg", [svg_file.arris_highlighted_path])
+  # SVG.save("#{new_name}_simplified.svg", [svg_file.arris_highlighted_path])
 
-  # SVG.save("#{new_name}_result.svg", svg_file.tpath)
+  SVG.save("#{new_name}_result.svg", svg_file.tpaths)
   # svg_file.make_gcode_file("#{new_name + '.gcode'}")
 end
 

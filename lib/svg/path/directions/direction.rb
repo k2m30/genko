@@ -1,7 +1,7 @@
 Point = Struct.new :x, :y
 
 class Direction
-  attr_accessor :start, :finish
+  attr_accessor :start, :finish, :rate, :angle
   attr_reader :command_code
 
 

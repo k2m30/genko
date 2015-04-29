@@ -3,6 +3,6 @@ class MoveTo < Direction
     [self]
   end
   def length
-    nil
+    1
   end
 end
