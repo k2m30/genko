@@ -4,7 +4,7 @@ require_relative 'path/path'
 
 class SVG
   attr_accessor :paths, :splitted_paths, :tpaths
-  attr_reader :width, :height
+  attr_reader :width, :height, :properties
 
   def initialize(file_name, properties_file_name = 'properties.yml')
     @splitted_paths = []
@@ -17,7 +17,7 @@ class SVG
   end
 
   def read_properties(file_name)
-    @properties = File.open(file_name) { |yf| YAML::load(yf) }
+    @properties = File.open(file_name) { |f| YAML::load(f) }
   end
 
   def split(size)
@@ -77,7 +77,6 @@ class SVG
       [min_x, min_y, max_x, max_y]
     end
 
-
     def save(file_name, paths)
       dimensions = calculate_dimensions(paths)
 
@@ -110,6 +109,44 @@ class SVG
 
       File.open(file_name, 'w') { |f| f.write builder.to_xml }
       print "Saved to #{file_name}\n"
+    end
+
+    def make_gcode_file(file_name, properties, paths)
+      begin
+        f = File.new file_name, 'w+'
+        f.puts "(#{file_name})"
+        f.puts "(#{Time.now.strftime('%d-%b-%y %H:%M:%S').to_s})"
+        properties.each_pair { |pair| f.puts "(#{pair})" }
+        f.puts '%'
+        #f.puts 'G51Y-1'
+        directions = []
+        paths.flatten.each do |subpath|
+          directions += subpath.directions
+        end
+        initial_x = properties['initial_x'].to_f.round(2)
+        initial_y = properties['initial_y'].to_f.round(2)
+        directions.each do |direction|
+          x = (direction.finish.x - initial_x).round(2)
+          y = (direction.finish.y - initial_y).round(2)
+          case direction.command_code
+            when 'M'
+              f.puts 'G00 Z0' unless direction.start.nil?
+              f.puts "G00 X#{x} Y#{y} Z0" unless direction.start.nil?
+            when 'L'
+              feed = (properties['linear_velocity'] * direction.rate).round(2)
+              f.puts "G01 X#{x} Y#{y} Z10 F#{feed}"
+            else
+              raise ArgumentError "Bad command in tpath #{direction.command_code}"
+          end
+        end
+        f.puts 'G00 Z0'
+        f.puts 'G00 X0 Y0 Z0'
+        f.puts 'M30'
+        f.close
+      rescue Exception => e
+        p e.message
+        p e.backtrace[0..5].join
+      end
     end
   end
 end

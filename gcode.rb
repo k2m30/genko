@@ -52,7 +52,7 @@ tmp_files.each_with_index do |name, i|
   # SVG.save("#{new_name}_simplified.svg", [svg_file.arris_highlighted_path])
 
   SVG.save("#{new_name}_result.svg", svg_file.tpaths)
-  # svg_file.make_gcode_file("#{new_name + '.gcode'}")
+  SVG.make_gcode_file("#{new_name + '.gcode'}", svg_file.properties, svg_file.tpaths)
 end
 
 tmp_files.each do |file|

@@ -20,12 +20,28 @@ class TPath
       @tpath.directions << tdirection
     end
 
-    # @tpaths.calculate_angles!
+    calculate_angles
     # l = @tpaths.length
     # @properties[:g00] = l[:length_g00]
     # @properties[:g01] = l[:length_g01]
-    tpath
+    @tpath
   end
+
+  private
+  def calculate_angles
+    @tpath.directions.each do |direction|
+      dx = direction.finish.x - direction.start.x
+      dy = -(direction.finish.y - direction.start.y) # Y axis inverted on the screen and .svg files
+
+      if dy != 0
+        tg = dx / dy
+      else
+        tg = (dx >= 0) ? Float::INFINITY : -Float::INFINITY
+      end
+      direction.angle = (Math.atan(tg) * 180 / Math::PI).round(2)
+    end
+  end
+
 
   def point_transform(point, w)
 
