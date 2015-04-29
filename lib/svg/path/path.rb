@@ -99,9 +99,16 @@ class Path
   end
 
   def reversed
-    reversed = self.clone
-    reversed.directions = reversed.directions.each(&:reverse).reverse
+    reversed = p.clone.first
+    last_point = reversed.directions.last.finish
+    move_to = MoveTo.new('M', [last_point.x, last_point.y])
+    move_to.start = move_to.finish
+    reversed.directions << move_to
+    reversed.directions.shift
+    reversed.directions.map!(&:reverse).reverse!
     reversed.organize!
+    reversed.d
+    reversed
   end
 
   class << self

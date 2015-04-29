@@ -153,7 +153,6 @@ class SVG
     closest_path
   end
 
-
   def read_svg(file_name)
     @paths = []
     elements = []
