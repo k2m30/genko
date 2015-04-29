@@ -10,6 +10,18 @@ class CubicCurveTo < QuadraticCurveTo
     super
   end
 
+  def reverse
+    reversed = self.clone
+    tmp = reversed.start
+    reversed.start = reversed.finish
+    reversed.finish = tmp
+
+    tmp = reversed.control_point_1
+    reversed.control_point_1 = reversed.control_point_2
+    reversed.control_point_2 = tmp
+
+    reversed
+  end
 
   def split(size, last_curve_point=nil)
     n = 4 #start number of pieces value

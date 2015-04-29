@@ -97,6 +97,12 @@ class Path
 
   end
 
+  def reversed
+    reversed = self.clone
+    reversed.directions = reversed.directions.each(&:reverse).reverse
+    reversed.organize!
+  end
+
   class << self
     def parse(d)
       raise TypeError unless d.is_a? String

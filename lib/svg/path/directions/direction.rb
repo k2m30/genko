@@ -23,6 +23,14 @@ class Direction
       end
   end
 
+  def reverse
+    reversed = self.clone
+    tmp = reversed.start
+    reversed.start = reversed.finish
+    reversed.finish = tmp
+    reversed
+  end
+
   def absolute!(start_point=nil)
     unless absolute?
       @finish.x += start_point.x
