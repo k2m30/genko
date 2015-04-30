@@ -136,9 +136,10 @@ class SVG
 
     until @paths.empty?
       closest, reversed = find_closest(point, @paths)
-      optimized_paths << closest
-      # reversed ? optimized_paths << closest.reversed : optimized_paths << closest
+      # optimized_paths << closest
       @paths.delete closest
+      reversed ? optimized_paths << closest.map!(&:reversed): optimized_paths << closest
+
       point = closest.last.directions.last.finish
     end
     @paths = optimized_paths
