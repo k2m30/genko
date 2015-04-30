@@ -40,11 +40,10 @@ class SVG
           xml.polyline(points: '0,0 8,4 0,8 2,4 0,0',
                        'stroke-width' => 1, stroke: 'darkred', fill: 'red')
         }
-        xml.style 'path {stroke-width: 1; fill: none;}'
+        xml.style 'path {stroke-width: 2; fill: none;}'
         xml.style '.stroke {stroke: black;}'
         xml.style '.move_to {stroke: red; marker-end: url(#arrow-end);}'
-        xml.style '.stroke path:hover {stroke-width: 2;}'
-        xml.style '.move_to path:hover{stroke-width: 2;}'
+        xml.style 'path:hover {stroke-width: 4;}'
 
         #main
         paths.each_with_index do |path, i|
