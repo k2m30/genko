@@ -55,6 +55,11 @@ class SVG
             xml.g(class: 'stroke', stroke: 'black', 'stroke-width' => 1, fill: 'none', 'marker-start' => 'none', 'marker-end' => 'none') {
               xml.path(d: subpath.d, id: "path_#{i*j+i}")
             }
+            xml.g(class: 'move_to', stroke: 'red', 'stroke-width' => 1, fill: 'none', 'marker-end' => 'url(#arrow-end)') {
+              start = subpath.directions.last.finish
+              finish = path[j+1].directions.first.finish
+              xml.path(d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", id: "move_#{i}")
+            } if j < path.size-1
           end
         end
 
@@ -130,8 +135,9 @@ class SVG
     optimized_paths = []
 
     until @paths.empty?
-      closest = find_closest(point, @paths)
+      closest, reversed = find_closest(point, @paths)
       optimized_paths << closest
+      # reversed ? optimized_paths << closest.reversed : optimized_paths << closest
       @paths.delete closest
       point = closest.last.directions.last.finish
     end
@@ -141,16 +147,28 @@ class SVG
   def find_closest(point, raw_paths)
     closest_distance = Float::INFINITY
     closest_path = nil
-    raw_paths.each do |subpath|
-      finish = subpath.first.directions.first.start
-      distance = Math.sqrt((finish.x-point.x)*(finish.x-point.x) + (finish.y-point.y)*(finish.y-point.y))
+    to_reverse = false
 
-      if distance < closest_distance
+    raw_paths.each do |subpath|
+      start_point = subpath.first.directions.first.start
+      finish_point = subpath.last.directions.last.finish
+      distance_to_start = Math.sqrt((start_point.x-point.x)*(start_point.x-point.x) + (start_point.y-point.y)*(start_point.y-point.y))
+      distance_to_finish = Math.sqrt((finish_point.x-point.x)*(finish_point.x-point.x) + (finish_point.y-point.y)*(finish_point.y-point.y))
+
+      if (distance_to_start < closest_distance) && (distance_to_start <= distance_to_finish)
         closest_path = subpath
-        closest_distance = distance
+        closest_distance = distance_to_start
+        to_reverse = false
       end
+
+      if (distance_to_finish < closest_distance) && (distance_to_finish < distance_to_start)
+        closest_path = subpath
+        closest_distance = distance_to_finish
+        to_reverse = true
+      end
+
     end
-    closest_path
+    return closest_path, to_reverse
   end
 
   def read_svg(file_name)

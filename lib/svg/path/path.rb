@@ -5,7 +5,7 @@ require_relative 'directions/horizontal_to'
 require_relative 'directions/vertical_to'
 require_relative 'directions/quadratic_curve_to'
 require_relative 'directions/cubic_curve_to'
-require_relative 'directions/arc_to'
+require_relative 'directions/arc_to' #there's no support for it
 require_relative 'directions/close_path'
 
 class Path
@@ -27,6 +27,10 @@ class Path
   def initialize(d='')
     @d = d
     @directions = []
+  end
+
+  def clone
+    Marshal::load(Marshal.dump(self))
   end
 
   def organize!(point=nil)
@@ -99,7 +103,7 @@ class Path
   end
 
   def reversed
-    reversed = p.clone.first
+    reversed = self.clone
     last_point = reversed.directions.last.finish
     move_to = MoveTo.new('M', [last_point.x, last_point.y])
     move_to.start = move_to.finish
