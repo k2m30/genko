@@ -40,36 +40,34 @@ class SVG
           xml.polyline(points: '0,0 8,4 0,8 2,4 0,0',
                        'stroke-width' => 1, stroke: 'darkred', fill: 'red')
         }
-        xml.style 'g.stroke path:hover {stroke-width: 2;}'
-        xml.style 'g.move_to path:hover{stroke-width: 2;}'
+        xml.style 'path {stroke-width: 1; fill: none;}'
+        xml.style '.stroke {stroke: black;}'
+        xml.style '.move_to {stroke: red; marker-end: url(#arrow-end);}'
+        xml.style '.stroke path:hover {stroke-width: 2;}'
+        xml.style '.move_to path:hover{stroke-width: 2;}'
 
         #main
         paths.each_with_index do |path, i|
           start = i.zero? ? start_point : paths[i-1].last.directions.last.finish
           finish = path.first.directions.first.finish
-          xml.g(class: 'move_to', stroke: 'red', 'stroke-width' => 1, fill: 'none', 'marker-end' => 'url(#arrow-end)') {
-            xml.path(d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", id: "move_#{i}")
-          } unless start.x.round == finish.x.round && start.y.round == finish.y.round
+          unless start.x.round == finish.x.round && start.y.round == finish.y.round
+            xml.path(id: "move_#{i}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
+          end
 
           path.each_with_index do |subpath, j|
-            xml.g(class: 'stroke', stroke: 'black', 'stroke-width' => 1, fill: 'none', 'marker-start' => 'none', 'marker-end' => 'none') {
-              xml.path(d: subpath.d, id: "path_#{i*j+i}")
-            }
-            xml.g(class: 'move_to', stroke: 'red', 'stroke-width' => 1, fill: 'none', 'marker-end' => 'url(#arrow-end)') {
+            xml.path(d: subpath.d, id: "path_#{i*j+i}", class: 'stroke')
+            if j < path.size-1
               start = subpath.directions.last.finish
               finish = path[j+1].directions.first.finish
-              xml.path(d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", id: "move_#{i}")
-            } if j < path.size-1
+              xml.path(id: "move_#{i}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
+            end
           end
         end
 
         #last move_to line
         start = paths.last.last.directions.last.finish
         finish = start_point
-        xml.g(class: 'move_to', stroke: 'red', 'stroke-width' => 1, fill: 'none', 'marker-start' => 'arrow-start', 'marker-end' => 'arrow-end') {
-          xml.path(d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", id: "move_#{paths.flatten.size}")
-        }
-
+        xml.path(id: "move_#{paths.flatten.size}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
       }
     end
 
@@ -99,7 +97,6 @@ class SVG
     File.open("./html/#{file_name}.html", 'w') { |f| f.write builder.to_html }
     print "Saved to ./html/#{file_name}.html\n"
   end
-
 
   def make_gcode_file(file_name, properties, paths)
     begin
@@ -140,19 +137,6 @@ class SVG
     print "Saved to #{file_name}\n"
   end
 
-  def reversed
-    reversed_path = []
-    @paths.each do |path|
-      subpaths = []
-      path.each do |subpath|
-        subpaths << subpath.reversed
-        p subpath.reversed
-      end
-      reversed_path += subpaths
-    end
-    @paths = reversed_path
-  end
-
   private
   def optimize
     point = Point.new @properties['initial_x'], @properties['initial_y']
@@ -161,9 +145,15 @@ class SVG
     @paths.flatten!
     until @paths.empty?
       closest, reversed = find_closest(point, @paths)
-      paths.delete closest
-      reversed ? optimized_paths << closest.reversed : optimized_paths << closest
-      point = closest.directions.last.finish
+      @paths.delete closest
+      if reversed
+        optimized_paths << closest.reversed
+        point = closest.reversed.directions.last.finish
+      else
+        optimized_paths << closest
+        point = closest.directions.last.finish
+      end
+
     end
     @paths = optimized_paths.map { |path| [path] }
   end
