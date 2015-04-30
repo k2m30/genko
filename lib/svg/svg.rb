@@ -4,7 +4,7 @@ require_relative 'path/path'
 
 class SVG
   attr_accessor :paths, :splitted_paths, :tpaths
-  attr_reader :width, :height, :properties
+  attr_reader :width, :height, :properties, :start_point
 
   def initialize(file_name, properties_file_name = 'properties.yml')
     @splitted_paths = []
@@ -13,13 +13,13 @@ class SVG
     read_properties properties_file_name
     optimize
     split @properties['max_segment_length']
+    calculate_length
     make_tpath
 
   end
 
   def save(file_name, paths)
     dimensions = calculate_dimensions(paths)
-    start_point = Point.new(@properties['initial_x'], @properties['initial_y'])
     builder = Nokogiri::XML::Builder.new do |xml|
       #header and styles
       xml.doc.create_internal_subset(
@@ -44,10 +44,15 @@ class SVG
         xml.style '.stroke {stroke: black;}'
         xml.style '.move_to {stroke: red; marker-end: url(#arrow-end);}'
         xml.style 'path:hover {stroke-width: 4;}'
+        xml.style 'text {font-family: Verdana; font-size: 16;}'
+
+        xml.text_(x: '25', y: '15'){
+          xml << "Рисование: #{@properties[:g01]}мм. Холостой ход: #{@properties[:g00]}мм."
+        }
 
         #first move_to line
         finish = paths.first.directions.first.finish
-        xml.path(id: "move_0", d: "M #{start_point.x},#{start_point.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
+        xml.path(id: "move_0", d: "M #{@start_point.x},#{@start_point.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
 
         #main
         paths.each_index do |i|
@@ -64,7 +69,7 @@ class SVG
 
         #last move_to line
         start = paths.last.directions.last.finish
-        finish = start_point
+        finish = @start_point
         xml.path(id: "move_#{paths.size}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
       }
     end
@@ -108,8 +113,8 @@ class SVG
       paths.flatten.each do |subpath|
         directions += subpath.directions
       end
-      initial_x = properties['initial_x'].to_f.round(2)
-      initial_y = properties['initial_y'].to_f.round(2)
+      initial_x = @start_point.x.round(2)
+      initial_y = @start_point.y.round(2)
       directions.each do |direction|
         x = (direction.finish.x - initial_x).round(2)
         y = (direction.finish.y - initial_y).round(2)
@@ -137,7 +142,7 @@ class SVG
 
   private
   def optimize
-    point = Point.new @properties['initial_x'], @properties['initial_y']
+    point = @start_point
     optimized_paths = []
 
     until @paths.empty?
@@ -221,12 +226,34 @@ class SVG
 
   def read_properties(file_name)
     @properties = File.open(file_name) { |f| YAML::load(f) }
+    @start_point = Point.new @properties['initial_x'], @properties['initial_y']
   end
 
   def split(size)
     @paths.each do |path|
       @splitted_paths << path.split(size)
     end
+  end
+
+  def calculate_length
+    g00 = length @start_point, @splitted_paths.first.directions.first.finish
+
+
+    g01 = 0
+    @splitted_paths.each_with_index do |path, i|
+      if i < @splitted_paths.size - 1
+        g00 += length @splitted_paths[i].directions.last.finish, @splitted_paths[i+1].directions.first.finish
+      end
+      g01 += path.length
+    end
+
+    g00 += length @splitted_paths.last.directions.last.finish, @start_point
+    @properties[:g00] = g00
+    @properties[:g01] = g01
+  end
+
+  def length(p1, p2)
+    Math.sqrt((p1.x-p2.x)**2+(p1.y-p2.y)**2).round
   end
 
 end

@@ -34,10 +34,10 @@ def split_colors(file_name)
   layers
 end
 
-# file_name = ARGV[0] || Dir.pwd + '/images/hare_1775.svg'
+file_name = ARGV[0] || Dir.pwd + '/images/hare_1775.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/Domik.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/fill.svg'
-file_name = ARGV[0] || Dir.pwd + '/images/risovaka007_003.svg'
+# file_name = ARGV[0] || Dir.pwd + '/images/risovaka007_003.svg'
 tmp_files = split_colors(file_name)
 p tmp_files
 

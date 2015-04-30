@@ -20,7 +20,7 @@ class Path
       s: CubicCurveTo,
       q: QuadraticCurveTo,
       t: QuadraticCurveTo,
-      a: ArcTo,
+      a: ArcTo, #there's no support for it
       z: ClosePath
   }
 
@@ -99,7 +99,12 @@ class Path
   end
 
   def length
-
+    length_g01 = 0
+    directions.each do |direction|
+      rate = direction.rate.nil? ? 1 : direction.rate
+      length_g01 += direction.length/rate if direction.is_a? LineTo
+    end
+    return length_g01.round
   end
 
   def reversed

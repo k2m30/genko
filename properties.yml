@@ -2,8 +2,8 @@ canvas_size_x : 1775.0
 linear_velocity : 30000.0
 ff_velocity : 30000.0
 max_segment_length : 10
-initial_x : 200.0
-initial_y : 200.0
+initial_x : 2000.0
+initial_y : 2000.0
 crop_x : 30
 crop_y : 30
 crop_w : 1000
