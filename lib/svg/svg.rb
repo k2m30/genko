@@ -77,6 +77,30 @@ class SVG
     print "Saved to #{file_name}\n"
   end
 
+  def save_html(file_name)
+    file_name.sub!('./result/', '')
+    builder = Nokogiri::HTML::Builder.new do |doc|
+      doc.html {
+        doc.head(lang: 'en') {
+          doc.meta(charset: 'utf-8')
+          doc.script(src: 'paint.js')
+        }
+        doc.body {
+          doc.object(data: "../result/#{file_name}.svg", type: 'image/svg+xml', id: 'result')
+          doc.div(style: 'margin: auto 40%;') {
+            doc.button(style: 'width: 100%; height: 60px;', autofocus: 'true', onclick: "paint('result')") {
+              doc << 'Paint'
+            }
+          }
+        }
+      }
+    end
+
+    File.open("./html/#{file_name}.html", 'w') { |f| f.write builder.to_html }
+    print "Saved to ./html/#{file_name}.html\n"
+  end
+
+
   def make_gcode_file(file_name, properties, paths)
     begin
       f = File.new file_name, 'w+'
@@ -134,15 +158,14 @@ class SVG
     point = Point.new @properties['initial_x'], @properties['initial_y']
     optimized_paths = []
 
+    @paths.flatten!
     until @paths.empty?
       closest, reversed = find_closest(point, @paths)
-      # optimized_paths << closest
-      @paths.delete closest
-      reversed ? optimized_paths << closest.map!(&:reversed): optimized_paths << closest
-
-      point = closest.last.directions.last.finish
+      paths.delete closest
+      reversed ? optimized_paths << closest.reversed : optimized_paths << closest
+      point = closest.directions.last.finish
     end
-    @paths = optimized_paths
+    @paths = optimized_paths.map { |path| [path] }
   end
 
   def find_closest(point, raw_paths)
@@ -151,8 +174,8 @@ class SVG
     to_reverse = false
 
     raw_paths.each do |subpath|
-      start_point = subpath.first.directions.first.start
-      finish_point = subpath.last.directions.last.finish
+      start_point = subpath.directions.first.start
+      finish_point = subpath.directions.last.finish
       distance_to_start = Math.sqrt((start_point.x-point.x)*(start_point.x-point.x) + (start_point.y-point.y)*(start_point.y-point.y))
       distance_to_finish = Math.sqrt((finish_point.x-point.x)*(finish_point.x-point.x) + (finish_point.y-point.y)*(finish_point.y-point.y))
 
