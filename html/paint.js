@@ -3,7 +3,7 @@ function paint(name){
     if ('contentDocument' in svgobject) {              // У нас действительно там что-то есть?
         var velocity = 2000; // mm/sec
         var delay = 0;
-        var paths = document.getElementById(name).contentDocument.querySelectorAll('g path');
+        var paths = document.getElementById(name).contentDocument.querySelectorAll('path');
         var transition = null;
         for (var i = 0; i < paths.length; i++) {
             l = paths[i].getTotalLength();

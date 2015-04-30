@@ -45,28 +45,27 @@ class SVG
         xml.style '.move_to {stroke: red; marker-end: url(#arrow-end);}'
         xml.style 'path:hover {stroke-width: 4;}'
 
-        #main
-        paths.each_with_index do |path, i|
-          start = i.zero? ? start_point : paths[i-1].last.directions.last.finish
-          finish = path.first.directions.first.finish
-          unless start.x.round == finish.x.round && start.y.round == finish.y.round
-            xml.path(id: "move_#{i}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
-          end
+        #first move_to line
+        finish = paths.first.directions.first.finish
+        xml.path(id: "move_0", d: "M #{start_point.x},#{start_point.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
 
-          path.each_with_index do |subpath, j|
-            xml.path(d: subpath.d, id: "path_#{i*j+i}", class: 'stroke')
-            if j < path.size-1
-              start = subpath.directions.last.finish
-              finish = path[j+1].directions.first.finish
-              xml.path(id: "move_#{i}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
+        #main
+        paths.each_index do |i|
+          xml.path(d: paths[i].d, id: "path_#{i}", class: 'stroke')
+          if i < paths.size-1
+            start = paths[i].directions.last.finish
+            finish = paths[i+1].directions.first.finish
+            unless start.x.round == finish.x.round && start.y.round == finish.y.round
+              xml.path(id: "move_#{i+1}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
             end
           end
+
         end
 
         #last move_to line
-        start = paths.last.last.directions.last.finish
+        start = paths.last.directions.last.finish
         finish = start_point
-        xml.path(id: "move_#{paths.flatten.size}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
+        xml.path(id: "move_#{paths.size}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
       }
     end
 
@@ -141,7 +140,6 @@ class SVG
     point = Point.new @properties['initial_x'], @properties['initial_y']
     optimized_paths = []
 
-    @paths.flatten!
     until @paths.empty?
       closest, reversed = find_closest(point, @paths)
       @paths.delete closest
@@ -154,7 +152,7 @@ class SVG
       end
 
     end
-    @paths = optimized_paths.map { |path| [path] }
+    @paths = optimized_paths
   end
 
   def find_closest(point, raw_paths)
@@ -194,18 +192,14 @@ class SVG
     elements.map do |e|
       @paths.push e.attribute_nodes.select { |a| a.name == 'd' }
     end
-    @paths.flatten!.map!(&:value).map! { |path| Path.parse path } #.flatten!
+    @paths.flatten!.map!(&:value).map! { |path| Path.parse path }.flatten!
     @width = svg.at_css('svg')[:width].to_f
     @height = svg.at_css('svg')[:height].to_f
   end
 
   def make_tpath
     @splitted_paths.each do |path|
-      subpaths = []
-      path.each do |subpath|
-        subpaths << TPath.new(subpath, @properties['canvas_size_x']).tpath
-      end
-      @tpaths << subpaths
+      @tpaths << TPath.new(path, @properties['canvas_size_x']).tpath
     end
   end
 
@@ -217,12 +211,10 @@ class SVG
     min_y = Float::INFINITY
 
     paths.each do |path|
-      path.each do |subpath|
-        min_x = subpath.dimensions[0] if subpath.dimensions[0] < min_x
-        min_y = subpath.dimensions[1] if subpath.dimensions[1] < min_y
-        max_x = subpath.dimensions[2] if subpath.dimensions[2] > max_x
-        max_y = subpath.dimensions[3] if subpath.dimensions[3] > max_y
-      end
+      min_x = path.dimensions[0] if path.dimensions[0] < min_x
+      min_y = path.dimensions[1] if path.dimensions[1] < min_y
+      max_x = path.dimensions[2] if path.dimensions[2] > max_x
+      max_y = path.dimensions[3] if path.dimensions[3] > max_y
     end
     [min_x, min_y, max_x, max_y]
   end
@@ -233,11 +225,7 @@ class SVG
 
   def split(size)
     @paths.each do |path|
-      subpaths = []
-      path.each do |subpath|
-        subpaths << subpath.split(size)
-      end
-      @splitted_paths << subpaths
+      @splitted_paths << path.split(size)
     end
   end
 
