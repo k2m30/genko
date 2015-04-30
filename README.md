@@ -26,7 +26,7 @@ Modify `properties.yml` according to your parameters.
 
 Then
 
-`ruby gcode.rb path_to_your_svg_flie`
+`ruby gcode.rb path_to_your_svg_file`
 
 Following files will be created:
 
