@@ -30,12 +30,17 @@ Then
 
 Following files will be created:
 
-`simplified.svg` - as far I don't have full SVG 1.2 support (see below), this file is needed to see future simplefied result. 
+result folder:
 
-`result.svg` - drawing thranslated to triangle coordinates system
+`filename_splitted.svg` - as far I don't have full SVG 1.2 support (see below), this file is needed to see future simplified result. 
 
-`result.gcode` - g-code file to be sent to you drawing machine.
+`filename_result.svg` - drawing translated to triangle coordinates system
 
+`filename.gcode` - g-code file to be sent to you drawing machine.
+
+html folder:
+
+`filename_splitted.html` - shows animated painting
 
 ##Features
 
