@@ -101,7 +101,7 @@ class Path
   def length
     length_g01 = 0
     directions.each do |direction|
-      rate = direction.rate.nil? ? 1 : direction.rate
+      rate = direction.rate.nil? || direction.rate.zero? ? 1 : direction.rate
       length_g01 += direction.length/rate if direction.is_a? LineTo
     end
     return length_g01.round

@@ -34,10 +34,10 @@ def split_colors(file_name)
   layers
 end
 
-file_name = ARGV[0] || Dir.pwd + '/images/hare_1775.svg'
+# file_name = ARGV[0] || Dir.pwd + '/images/hare_1775.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/Domik.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/fill.svg'
-# file_name = ARGV[0] || Dir.pwd + '/images/risovaka007_003.svg'
+file_name = ARGV[0] || Dir.pwd + '/images/risovaka007_003.svg'
 tmp_files = split_colors(file_name)
 p tmp_files
 
@@ -51,7 +51,7 @@ tmp_files.each_with_index do |name, i|
   svg_file.save("#{new_name}_splitted.svg", svg_file.splitted_paths)
   svg_file.save_html("#{new_name}_splitted")
   svg_file.save("#{new_name}_result.svg", svg_file.tpaths)
-  svg_file.make_gcode_file("#{new_name + '.gcode'}", svg_file.properties, svg_file.tpaths)
+  svg_file.export_to_gcode("#{new_name}", svg_file.tpaths)
 end
 
 tmp_files.each do |file|

@@ -1,12 +1,12 @@
-canvas_size_x : 1775.0
-linear_velocity : 30000.0
-ff_velocity : 30000.0
-max_segment_length : 10
-initial_x : 2000.0
-initial_y : 2000.0
-crop_x : 30
-crop_y : 30
-crop_w : 1000
-crop_h : 1000
-dx : 0
-dy : 0
+canvas_size_x : 1775.0 #ширина холста
+linear_velocity : 30000.0 #линейная скорость окраски, мм/мин, g01
+ff_velocity : 30000.0 #линейная скорость холостого хода, мм/мин, g00
+max_segment_length : 10 #точность апроксимации, мм
+initial_x : 2000.0 # начальная длина левого ремня, мм
+initial_y : 2000.0 # начальная длина правого ремня, мм
+crop_x : 30 #
+crop_y : 30 #
+crop_w : 1000 #
+crop_h : 1000 #
+max_spray_length : 10000.0 # длина окраски одним баллончиком краски, мм
+z_turn : 10 #поворот оси z для начала окраски, мм

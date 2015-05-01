@@ -15,7 +15,6 @@ class SVG
     split @properties['max_segment_length']
     calculate_length
     make_tpath
-
   end
 
   def save(file_name, paths)
@@ -101,38 +100,66 @@ class SVG
     print "Saved to ./html/#{file_name}.html\n"
   end
 
-  def make_gcode_file(file_name, properties, paths)
+  def split_fot_spray(paths_to_split, spray_length)
+    tmp_length = 0
+    tmp_paths = []
+    paths = []
+    paths_to_split.each do |path|
+      tmp_length+= path.length
+      tmp_paths << path
+      if tmp_length > spray_length
+        tmp_paths.delete path
+        paths << tmp_paths
+        tmp_paths = [path]
+        tmp_length = 0
+      end
+    end
+    paths << tmp_paths
+    paths
+  end
+
+  def export_to_gcode(file_name, export_paths)
+    paths_for_spray = split_fot_spray export_paths, @properties['max_spray_length'].to_f
+    paths_for_spray.each_with_index do |paths, i|
+      make_gcode_file("#{file_name}_#{i}.gcode", paths)
+    end
+  end
+
+  def make_gcode_file(file_name, paths)
+
     begin
       f = File.new file_name, 'w+'
       f.puts "(#{file_name})"
       f.puts "(#{Time.now.strftime('%d-%b-%y %H:%M:%S').to_s})"
-      properties.each_pair { |pair| f.puts "(#{pair})" }
+      @properties.each_pair { |pair| f.puts "(#{pair})" }
       f.puts '%'
       #f.puts 'G51Y-1'
-      directions = []
-      paths.flatten.each do |subpath|
-        directions += subpath.directions
-      end
-      initial_x = @start_point.x.round(2)
-      initial_y = @start_point.y.round(2)
-      directions.each do |direction|
-        x = (direction.finish.x - initial_x).round(2)
-        y = (direction.finish.y - initial_y).round(2)
-        case direction.command_code
-          when 'M'
-            f.puts 'G00 Z0' unless direction.start.nil?
-            f.puts "G00 X#{x} Y#{y} Z0" unless direction.start.nil?
-          when 'L'
-            feed = (properties['linear_velocity'] * direction.rate).round(2)
-            f.puts "G01 X#{x} Y#{y} Z10 F#{feed}"
-          else
-            raise ArgumentError "Bad command in tpath #{direction.command_code}"
+      initial_x = @start_point.x
+      initial_y = @start_point.y
+
+      paths.each do |path|
+        f.puts
+        f.puts "(#{path.length} #{path.d})"
+        path.directions.each do |direction|
+          x = (direction.finish.x - initial_x).round(2)
+          y = (direction.finish.y - initial_y).round(2)
+          case direction.command_code
+            when 'M'
+              f.puts 'G00 Z0'
+              f.puts "G00 X#{x} Y#{y} Z0"
+            when 'L'
+              feed = (@properties['linear_velocity'] * direction.rate).round(2)
+              f.puts "G01 X#{x} Y#{y} Z#{@properties['z_turn']} F#{feed}"
+            else
+              raise ArgumentError "Bad command in tpath #{direction.command_code}"
+          end
         end
       end
       f.puts 'G00 Z0'
       f.puts 'G00 X0 Y0 Z0'
       f.puts 'M30'
       f.close
+
     rescue Exception => e
       p e.message
       p e.backtrace[0..5].join
@@ -237,8 +264,6 @@ class SVG
 
   def calculate_length
     g00 = length @start_point, @splitted_paths.first.directions.first.finish
-
-
     g01 = 0
     @splitted_paths.each_with_index do |path, i|
       if i < @splitted_paths.size - 1
