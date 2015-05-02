@@ -135,6 +135,7 @@ class Path
 
     private
     def extract_subpaths(d)
+      d[0] = '' if d[0]==' '
       subpaths = []
       move_index = d.index(/[Mm]/)
 

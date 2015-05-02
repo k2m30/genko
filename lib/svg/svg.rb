@@ -6,15 +6,9 @@ class SVG
   attr_accessor :paths, :splitted_paths, :tpaths
   attr_reader :width, :height, :properties, :start_point
 
-  def initialize(file_name, properties_file_name = 'properties.yml')
+  def initialize#(file_name, properties_file_name = 'properties.yml')
     @splitted_paths = []
     @tpaths = []
-    read_svg file_name
-    read_properties properties_file_name
-    optimize
-    split @properties['max_segment_length']
-    calculate_length
-    make_tpath
   end
 
   def save(file_name, paths)
@@ -77,6 +71,34 @@ class SVG
     print "Saved to #{file_name}\n"
   end
 
+  def dump(file_name, paths)
+    dimensions = calculate_dimensions(paths)
+    builder = Nokogiri::XML::Builder.new do |xml|
+      #header and styles
+      xml.doc.create_internal_subset(
+          'svg',
+          '-//W3C//DTD SVG 1.1//EN',
+          'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'
+      )
+      xml.svg(version: '1.1',
+              xmlns: 'http://www.w3.org/2000/svg',
+              'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
+              x: 0, y: 0,
+              width: dimensions[2], height: dimensions[3],
+              viewBox: "0, 0, #{dimensions[2]}, #{dimensions[3]}") {
+        xml.style 'path {stroke-width: 2; fill: none;}'
+        xml.style '.stroke {stroke: black;}'
+        xml.style 'path:hover {stroke-width: 4;}'
+        paths.each_index do |i|
+          xml.path(d: paths[i].d, id: "path_#{i}", class: 'stroke')
+        end
+      }
+    end
+
+    File.open(file_name, 'w') { |f| f.write builder.to_xml }
+    print "Saved to #{file_name}\n"
+  end
+
   def save_html(file_name)
     file_name.sub!('./result/', '')
     builder = Nokogiri::HTML::Builder.new do |doc|
@@ -100,14 +122,14 @@ class SVG
     print "Saved to ./html/#{file_name}.html\n"
   end
 
-  def split_fot_spray(paths_to_split, spray_length)
+  def split_for_spray
     tmp_length = 0
     tmp_paths = []
     paths = []
-    paths_to_split.each do |path|
+    @splitted_paths.each do |path|
       tmp_length+= path.length
       tmp_paths << path
-      if tmp_length > spray_length
+      if tmp_length > @properties['max_spray_length']
         tmp_paths.delete path
         paths << tmp_paths
         tmp_paths = [path]
@@ -118,15 +140,7 @@ class SVG
     paths
   end
 
-  def export_to_gcode(file_name, export_paths)
-    paths_for_spray = split_fot_spray export_paths, @properties['max_spray_length'].to_f
-    paths_for_spray.each_with_index do |paths, i|
-      make_gcode_file("#{file_name}_#{i}.gcode", paths)
-    end
-  end
-
   def make_gcode_file(file_name, paths)
-
     begin
       f = File.new file_name, 'w+'
       f.puts "(#{file_name})"
@@ -167,7 +181,6 @@ class SVG
     print "Saved to #{file_name}\n"
   end
 
-  private
   def optimize
     point = @start_point
     optimized_paths = []
@@ -215,6 +228,7 @@ class SVG
   end
 
   def read_svg(file_name)
+    @properties['file_name'] = file_name
     @paths = []
     elements = []
     svg = Nokogiri::XML open file_name
@@ -256,9 +270,9 @@ class SVG
     @start_point = Point.new @properties['initial_x'], @properties['initial_y']
   end
 
-  def split(size)
+  def split
     @paths.each do |path|
-      @splitted_paths << path.split(size)
+      @splitted_paths << path.split(@properties['max_segment_length'])
     end
   end
 
