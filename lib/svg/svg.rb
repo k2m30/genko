@@ -253,6 +253,26 @@ class SVG
     @properties[:g01] = g01
   end
 
+  def crop
+    x0 = @properties['crop_x']
+    y0 = @properties['crop_y']
+    w = @properties['crop_w']
+    h = @properties['crop_h']
+    @splitted_paths.each do |path|
+      path.directions.each do |d|
+        if d.is_a? LineTo &&
+                       (d.start.x < x0 ||
+                           d.start.y < y0 ||
+                           d.finish.x > x0 + w ||
+                           d.finish.y > y0 + h)
+          path.directions[path.directions.index(d)] = MoveTo.new('M', [d.finish.x, d.finish.y])
+          # d = MoveTo.new('M', [d.finish.x, d.finish.y])
+        end
+      end
+      path.organize!
+    end
+  end
+
   private
 
   def calculate_dimensions(paths)
