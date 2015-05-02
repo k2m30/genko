@@ -6,11 +6,12 @@ class SVG
   attr_accessor :paths, :splitted_paths, :tpaths
   attr_reader :width, :height, :properties, :start_point
 
-  def initialize#(file_name, properties_file_name = 'properties.yml')
+  def initialize #(file_name, properties_file_name = 'properties.yml')
     @splitted_paths = []
     @tpaths = []
   end
 
+# @return [It saves paths to .svg separated with move_to lines to illustrate order of painting. Returns nothing]
   def save(file_name, paths)
     dimensions = calculate_dimensions(paths)
     builder = Nokogiri::XML::Builder.new do |xml|
@@ -39,7 +40,7 @@ class SVG
         xml.style 'path:hover {stroke-width: 4;}'
         xml.style 'text {font-family: Verdana; font-size: 16;}'
 
-        xml.text_(x: '25', y: '15'){
+        xml.text_(x: '25', y: '15') {
           xml << "Рисование: #{@properties[:g01]}мм. Холостой ход: #{@properties[:g00]}мм."
         }
 
@@ -71,6 +72,7 @@ class SVG
     print "Saved to #{file_name}\n"
   end
 
+# @return [It saves paths to .svg as is. Returns nothing]
   def dump(file_name, paths)
     dimensions = calculate_dimensions(paths)
     builder = Nokogiri::XML::Builder.new do |xml|
@@ -122,6 +124,9 @@ class SVG
     print "Saved to ./html/#{file_name}.html\n"
   end
 
+# @return [it splits path into several separate paths according to properties['max_spray_length'] value.
+# One path of 100m long can be splitted into 5 of 20m.
+# Returns array of paths]
   def split_for_spray
     tmp_length = 0
     tmp_paths = []
@@ -200,33 +205,6 @@ class SVG
     @paths = optimized_paths
   end
 
-  def find_closest(point, raw_paths)
-    closest_distance = Float::INFINITY
-    closest_path = nil
-    to_reverse = false
-
-    raw_paths.each do |subpath|
-      start_point = subpath.directions.first.start
-      finish_point = subpath.directions.last.finish
-      distance_to_start = Math.sqrt((start_point.x-point.x)*(start_point.x-point.x) + (start_point.y-point.y)*(start_point.y-point.y))
-      distance_to_finish = Math.sqrt((finish_point.x-point.x)*(finish_point.x-point.x) + (finish_point.y-point.y)*(finish_point.y-point.y))
-
-      if (distance_to_start < closest_distance) && (distance_to_start <= distance_to_finish)
-        closest_path = subpath
-        closest_distance = distance_to_start
-        to_reverse = false
-      end
-
-      if (distance_to_finish < closest_distance) && (distance_to_finish < distance_to_start)
-        closest_path = subpath
-        closest_distance = distance_to_finish
-        to_reverse = true
-      end
-
-    end
-    return closest_path, to_reverse
-  end
-
   def read_svg(file_name)
     @properties['file_name'] = file_name
     @paths = []
@@ -247,22 +225,6 @@ class SVG
     @splitted_paths.each do |path|
       @tpaths << TPath.new(path, @properties['canvas_size_x']).tpath
     end
-  end
-
-  def calculate_dimensions(paths)
-    max_x = -Float::INFINITY
-    max_y = -Float::INFINITY
-
-    min_x = Float::INFINITY
-    min_y = Float::INFINITY
-
-    paths.each do |path|
-      min_x = path.dimensions[0] if path.dimensions[0] < min_x
-      min_y = path.dimensions[1] if path.dimensions[1] < min_y
-      max_x = path.dimensions[2] if path.dimensions[2] > max_x
-      max_y = path.dimensions[3] if path.dimensions[3] > max_y
-    end
-    [min_x, min_y, max_x, max_y]
   end
 
   def read_properties(file_name)
@@ -289,6 +251,51 @@ class SVG
     g00 += length @splitted_paths.last.directions.last.finish, @start_point
     @properties[:g00] = g00
     @properties[:g01] = g01
+  end
+
+  private
+
+  def calculate_dimensions(paths)
+    max_x = -Float::INFINITY
+    max_y = -Float::INFINITY
+
+    min_x = Float::INFINITY
+    min_y = Float::INFINITY
+
+    paths.each do |path|
+      min_x = path.dimensions[0] if path.dimensions[0] < min_x
+      min_y = path.dimensions[1] if path.dimensions[1] < min_y
+      max_x = path.dimensions[2] if path.dimensions[2] > max_x
+      max_y = path.dimensions[3] if path.dimensions[3] > max_y
+    end
+    [min_x, min_y, max_x, max_y]
+  end
+
+  def find_closest(point, raw_paths)
+    closest_distance = Float::INFINITY
+    closest_path = nil
+    to_reverse = false
+
+    raw_paths.each do |subpath|
+      start_point = subpath.directions.first.start
+      finish_point = subpath.directions.last.finish
+      distance_to_start = Math.sqrt((start_point.x-point.x)*(start_point.x-point.x) + (start_point.y-point.y)*(start_point.y-point.y))
+      distance_to_finish = Math.sqrt((finish_point.x-point.x)*(finish_point.x-point.x) + (finish_point.y-point.y)*(finish_point.y-point.y))
+
+      if (distance_to_start < closest_distance) && (distance_to_start <= distance_to_finish)
+        closest_path = subpath
+        closest_distance = distance_to_start
+        to_reverse = false
+      end
+
+      if (distance_to_finish < closest_distance) && (distance_to_finish < distance_to_start)
+        closest_path = subpath
+        closest_distance = distance_to_finish
+        to_reverse = true
+      end
+
+    end
+    return closest_path, to_reverse
   end
 
   def length(p1, p2)

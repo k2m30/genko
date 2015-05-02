@@ -80,10 +80,6 @@ tmp_files.each_with_index do |tmp_name, i|
   tmp_files_splitted += names
 end
 
-tmp_files.each do |file|
-  File.delete file
-end
+tmp_files.each { |file| File.delete file }
 
-tmp_files_splitted.each do |file|
-  File.delete file
-end
+tmp_files_splitted.each { |file| File.delete file }
