@@ -133,7 +133,7 @@ class SVG
         tmp_paths.delete path
         paths << tmp_paths
         tmp_paths = [path]
-        tmp_length = 0
+        tmp_length = path.length
       end
     end
     paths << tmp_paths
