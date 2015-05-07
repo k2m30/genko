@@ -35,8 +35,10 @@ def split_for_spray(file_name, properties_file_name = 'properties.yml')
   svg_file.read_properties properties_file_name
   svg_file.read_svg file_name
 
-  svg_file.optimize
   svg_file.split
+  svg_file.crop
+  svg_file.optimize
+
   paths_set = svg_file.split_for_spray
   names = []
   paths_set.each_with_index do |paths, i|
@@ -67,6 +69,7 @@ tmp_files.each_with_index do |tmp_name, i|
     svg_file.read_properties properties_file_name
     svg_file.read_svg name
 
+    next if svg_file.paths.empty?
     svg_file.splitted_paths = svg_file.paths
     svg_file.calculate_length
     svg_file.make_tpath

@@ -258,18 +258,33 @@ class SVG
     y0 = @properties['crop_y']
     w = @properties['crop_w']
     h = @properties['crop_h']
-    @splitted_paths.each do |path|
-      path.directions.each do |d|
-        if d.is_a? LineTo &&
-                       (d.start.x < x0 ||
-                           d.start.y < y0 ||
-                           d.finish.x > x0 + w ||
-                           d.finish.y > y0 + h)
-          path.directions[path.directions.index(d)] = MoveTo.new('M', [d.finish.x, d.finish.y])
-          # d = MoveTo.new('M', [d.finish.x, d.finish.y])
+    @splitted_paths.each_with_index do |path, i|
+      path.directions.each_with_index do |d, k|
+        if (d.is_a? LineTo)&&
+            (d.start.x < x0 ||
+                d.start.y < y0 ||
+                d.finish.x > x0 + w ||
+                d.finish.y > y0 + h)
+          next_path = Path.new
+          next_path.directions.push MoveTo.new('M', [d.finish.x, d.finish.y])
+          next_path.directions += path.directions.drop k+1
+          @splitted_paths.insert i+1, next_path
+          @splitted_paths[i+1].organize!
+          @splitted_paths[i].directions = path.directions.take k
+          break
         end
       end
-      path.organize!
+    end
+
+    to_delete = []
+    @splitted_paths.each_with_index do |path, i|
+      if path.directions.size <= 1 || path.directions.all? { |d| d.is_a? MoveTo } || path.length == 0
+        to_delete << path
+      end
+    end
+
+    to_delete.each do |path|
+      @splitted_paths.delete(path)
     end
   end
 
