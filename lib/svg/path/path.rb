@@ -35,23 +35,23 @@ class Path
 
   def organize!(point=nil)
     if point.nil?
-      @start = directions.first.finish
-      directions.first.start = directions.first.finish
+      @start = directions.first.finish.dup
+      directions.first.start = directions.first.finish.dup
     else
-      @start = point
-      directions.first.start = point
+      @start = point.dup
+      directions.first.start = point.dup
     end
-    directions.first.absolute!(@start)
+    directions.first.absolute!(@start.dup)
     directions.each_index do |i|
-      next if i==0
-      directions[i].absolute!(directions[i-1].finish)
+      next if i.zero?
+      directions[i].absolute!(directions[i-1].finish.dup)
     end
     if directions.last.is_a? ClosePath
       start_point = directions[-2].finish
       directions[-1] = LineTo.new 'L', [@start.x, @start.y]
       directions[-1].start = start_point
     end
-    @finish = directions.last.finish
+    @finish = directions.last.finish.dup
     self.d
     self
   end

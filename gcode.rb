@@ -37,6 +37,7 @@ def split_for_spray(file_name, properties_file_name = 'properties.yml')
 
   svg_file.split
   svg_file.crop
+  svg_file.move
   svg_file.optimize
 
   paths_set = svg_file.split_for_spray

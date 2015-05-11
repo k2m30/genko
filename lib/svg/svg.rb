@@ -253,11 +253,36 @@ class SVG
     @properties[:g01] = g01
   end
 
+  def move
+    dx = @properties['move_x']
+    dy = @properties['move_y']
+
+    if dx.nil? || dy.nil?
+      p 'No move parameters found. Continue without move'
+      return
+    end
+
+    @splitted_paths.each_with_index do |path, i|
+      @splitted_paths[i].directions.each do |direction|
+        direction.start.x += dx
+        direction.start.y += dy
+
+        direction.finish.x += dx
+        direction.finish.y += dy
+      end
+      # @splitted_paths[i].organize!
+    end
+  end
+
   def crop
     x0 = @properties['crop_x']
     y0 = @properties['crop_y']
     w = @properties['crop_w']
     h = @properties['crop_h']
+    if x0.nil? || y0.nil? || w.nil? || h.nil?
+      p 'No crop parameters found. Continue without crop'
+      return
+    end
     @splitted_paths.each_with_index do |path, i|
       path.directions.each_with_index do |d, k|
         if (d.is_a? LineTo)&&

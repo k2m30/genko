@@ -1,4 +1,11 @@
 Point = Struct.new :x, :y
+# class Point
+#   attr_accessor :x, :y
+#   def initialize(x, y)
+#     @x=x
+#     @y=y
+#   end
+# end
 
 class Direction
   attr_accessor :start, :finish, :rate, :angle
