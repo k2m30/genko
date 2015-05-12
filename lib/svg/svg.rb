@@ -295,9 +295,9 @@ class SVG
                 d.finish.y > y0 + h)
           next_path = Path.new
           next_path.directions.push MoveTo.new('M', [d.finish.x, d.finish.y])
+          next_path.directions.first.start = next_path.directions.first.finish.dup
           next_path.directions += path.directions.drop k+1
           @splitted_paths.insert i+1, next_path
-          @splitted_paths[i+1].organize!
           @splitted_paths[i].directions = path.directions.take k
           break
         end
@@ -306,7 +306,7 @@ class SVG
 
     to_delete = []
     @splitted_paths.each_with_index do |path, i|
-      if path.directions.size <= 1 || path.directions.all? { |d| d.is_a? MoveTo } || path.length == 0
+      if path.directions.size <= 1 || path.directions.all? { |d| d.is_a? MoveTo }
         to_delete << path
       end
     end
