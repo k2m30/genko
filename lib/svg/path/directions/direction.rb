@@ -1,11 +1,15 @@
-Point = Struct.new :x, :y
-# class Point
-#   attr_accessor :x, :y
-#   def initialize(x, y)
-#     @x=x
-#     @y=y
-#   end
-# end
+# Point = Struct.new :x, :y
+class Point
+  attr_accessor :x, :y
+  def initialize(x, y)
+    @x=x
+    @y=y
+  end
+
+  def to_s
+    [x, y].to_s
+  end
+end
 
 class Direction
   attr_accessor :start, :finish, :rate, :angle
@@ -52,4 +56,5 @@ class Direction
     " #{command_code} #{finish.x} #{finish.y}"
   end
 
+  alias_method :to_s, :to_command
 end

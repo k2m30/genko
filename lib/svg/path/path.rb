@@ -120,6 +120,11 @@ class Path
     reversed
   end
 
+  def inspect
+    d
+  end
+  alias_method :to_s, :inspect
+
   class << self
     def parse(d)
       raise TypeError unless d.is_a? String

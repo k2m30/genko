@@ -190,18 +190,13 @@ class SVG
     point = @start_point
     optimized_paths = []
 
-    until @paths.empty?
+    until @paths.empty? do
       closest, reversed = find_closest(point, @paths)
       @paths.delete closest
-      if reversed
-        optimized_paths << closest.reversed
-        point = closest.reversed.directions.last.finish
-      else
-        optimized_paths << closest
-        point = closest.directions.last.finish
-      end
-
+      reversed ? optimized_paths << closest.reversed : optimized_paths << closest
+      point = optimized_paths.last.directions.last.finish
     end
+
     @paths = optimized_paths
   end
 
@@ -262,7 +257,7 @@ class SVG
       return
     end
 
-    @splitted_paths.each_with_index do |path, i|
+    @splitted_paths.each_index do |i|
       @splitted_paths[i].directions.each do |direction|
         direction.start.x += dx
         direction.start.y += dy
@@ -331,25 +326,25 @@ class SVG
     [min_x, min_y, max_x, max_y]
   end
 
-  def find_closest(point, raw_paths)
+  def find_closest(point, paths)
     closest_distance = Float::INFINITY
     closest_path = nil
     to_reverse = false
 
-    raw_paths.each do |subpath|
-      start_point = subpath.directions.first.start
-      finish_point = subpath.directions.last.finish
+    paths.each do |path|
+      start_point = path.directions.first.finish
+      finish_point = path.directions.last.finish
       distance_to_start = Math.sqrt((start_point.x-point.x)*(start_point.x-point.x) + (start_point.y-point.y)*(start_point.y-point.y))
       distance_to_finish = Math.sqrt((finish_point.x-point.x)*(finish_point.x-point.x) + (finish_point.y-point.y)*(finish_point.y-point.y))
 
       if (distance_to_start < closest_distance) && (distance_to_start <= distance_to_finish)
-        closest_path = subpath
+        closest_path = path
         closest_distance = distance_to_start
         to_reverse = false
       end
 
       if (distance_to_finish < closest_distance) && (distance_to_finish < distance_to_start)
-        closest_path = subpath
+        closest_path = path
         closest_distance = distance_to_finish
         to_reverse = true
       end

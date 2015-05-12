@@ -7,7 +7,6 @@ class TPath
       tdirection = direction.clone
       tdirection.start = point_transform(direction.start, width)
       tdirection.finish = point_transform(direction.finish, width)
-
       begin
         tdirection.rate = tdirection.length / direction.length
       rescue => e
@@ -15,15 +14,10 @@ class TPath
         p e.message
         pp e.backtrace[0..4]
       end
-
-
       @tpath.directions << tdirection
     end
 
     calculate_angles
-    # l = @tpaths.length
-    # @properties[:g00] = l[:length_g00]
-    # @properties[:g01] = l[:length_g01]
     @tpath
   end
 
@@ -44,7 +38,6 @@ class TPath
 
 
   def point_transform(point, w)
-
     x = point.x
     y = point.y
     lx = Math.sqrt(x*x + y*y)
