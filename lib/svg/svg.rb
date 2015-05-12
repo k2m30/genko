@@ -25,8 +25,8 @@ class SVG
               xmlns: 'http://www.w3.org/2000/svg',
               'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
               x: 0, y: 0,
-              width: dimensions[2], height: dimensions[3],
-              viewBox: "0, 0, #{dimensions[2]}, #{dimensions[3]}") {
+              width: @properties[:width], height: @properties[:height],
+              viewBox: "0, 0, #{@properties[:width]}, #{@properties[:height]}") {
         xml.marker(id: 'arrow-end',
                    markerWidth: 8, markerHeight: 8,
                    refX: '2%', refY: 4,
@@ -34,7 +34,7 @@ class SVG
           xml.polyline(points: '0,0 8,4 0,8 2,4 0,0',
                        'stroke-width' => 1, stroke: 'darkred', fill: 'red')
         }
-        xml.style 'path {stroke-width: 2; fill: none;}'
+        xml.style 'path, rect {stroke-width: 2; fill: none;}'
         xml.style '.stroke {stroke: black;}'
         xml.style '.move_to {stroke: red; marker-end: url(#arrow-end);}'
         xml.style 'path:hover {stroke-width: 4;}'
@@ -43,6 +43,16 @@ class SVG
         xml.text_(x: '25', y: '15') {
           xml << "Рисование: #{@properties[:g01]}мм. Холостой ход: #{@properties[:g00]}мм."
         }
+
+        xml.rect(x: 2, y: 2, width: @properties[:width]-2, height: @properties[:height]-2, stroke: 'grey')
+        xml.rect(x: @properties['crop_x'] + @properties['move_x'],
+                 y: @properties['crop_y'] + @properties['move_y'],
+                 width: @properties['crop_w'] + @properties['move_x'],
+                 height: @properties['crop_h'] + @properties['move_y'], stroke: 'grey')
+        radius = @properties[:width].to_f/100
+        radius = 25 if radius > 25
+        radius = 5 if radius < 5
+        xml.circle(cx: @properties['move_x'], cy: @properties['move_y'], r: radius, fill: 'green' )
 
         #first move_to line
         finish = paths.first.directions.first.finish
@@ -111,7 +121,7 @@ class SVG
         }
         doc.body {
           doc.object(data: "../result/#{file_name}.svg", type: 'image/svg+xml', id: 'result')
-          doc.div(style: 'margin: auto 40%;') {
+          doc.div(style: 'margin: 20px 40% 20px 40%;') {
             doc.button(style: 'width: 100%; height: 60px;', autofocus: 'true', onclick: "paint('result')") {
               doc << 'Paint'
             }
@@ -212,8 +222,6 @@ class SVG
       @paths.push e.attribute_nodes.select { |a| a.name == 'd' }
     end
     @paths.flatten!.map!(&:value).map! { |path| Path.parse path }.flatten!
-    @width = svg.at_css('svg')[:width].to_f
-    @height = svg.at_css('svg')[:height].to_f
   end
 
   def make_tpath
@@ -334,8 +342,8 @@ class SVG
     paths.each do |path|
       start_point = path.directions.first.finish
       finish_point = path.directions.last.finish
-      distance_to_start = Math.sqrt((start_point.x-point.x)*(start_point.x-point.x) + (start_point.y-point.y)*(start_point.y-point.y))
-      distance_to_finish = Math.sqrt((finish_point.x-point.x)*(finish_point.x-point.x) + (finish_point.y-point.y)*(finish_point.y-point.y))
+      distance_to_start = Math.sqrt((start_point.x-point.x)**2 + (start_point.y-point.y)**2)
+      distance_to_finish = Math.sqrt((finish_point.x-point.x)**2 + (finish_point.y-point.y)**2)
 
       if (distance_to_start < closest_distance) && (distance_to_start <= distance_to_finish)
         closest_path = path

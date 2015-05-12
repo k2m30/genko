@@ -13,6 +13,10 @@ def split_colors(file_name)
   layers = []
   svg = Nokogiri::XML::Document.parse open file_name
 
+  @width = svg.at_css('svg')[:width].to_f
+  @height = svg.at_css('svg')[:height].to_f
+  p [file_name, @width, @height]
+
   svg.root.elements.select { |e| e.attributes['id'] && include_color?(e.attributes['id'].value) }.each do |layer|
     name = layer.attributes['id'].value
     builder = Nokogiri::XML::Builder.new do
@@ -57,6 +61,7 @@ end
 # file_name = ARGV[0] || Dir.pwd + '/images/yellow.svg'
 file_name = ARGV[0] || Dir.pwd + '/images/risovaka007_003.svg'
 color_files = split_colors(file_name)
+
 p color_files
 
 Dir.mkdir('result') unless Dir.exists?('result')
@@ -70,6 +75,8 @@ color_files.each_with_index do |tmp_name, i|
   names.each do |name|
     svg_file = SVG.new
     svg_file.read_properties properties_file_name
+    svg_file.properties[:width] = @width
+    svg_file.properties[:height] = @height
     svg_file.read_svg name
 
     next if svg_file.paths.empty?
