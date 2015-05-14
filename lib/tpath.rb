@@ -5,8 +5,8 @@ class TPath
     @tpath = Path.new
     path.directions.each do |direction|
       tdirection = direction.clone
-      tdirection.start = point_transform(direction.start, width)
-      tdirection.finish = point_transform(direction.finish, width)
+      tdirection.start = direction.start.t_transform width
+      tdirection.finish = direction.finish.t_transform width
       begin
         tdirection.rate = tdirection.length / direction.length
       rescue => e
@@ -34,19 +34,6 @@ class TPath
       end
       direction.angle = (Math.atan(tg) * 180 / Math::PI).round(2)
     end
-  end
-
-
-  def point_transform(point, w)
-    x = point.x
-    y = point.y
-    lx = Math.sqrt(x*x + y*y)
-
-    x = point.x
-    y = point.y
-    ly = Math.sqrt((w-x)*(w-x) + y*y)
-
-    Point.new lx.round(2), ly.round(2)
   end
 
 end

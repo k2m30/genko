@@ -1,3 +1,4 @@
+require_relative 'directions/point'
 require_relative 'directions/direction'
 require_relative 'directions/move_to'
 require_relative 'directions/line_to'

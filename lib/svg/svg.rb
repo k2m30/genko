@@ -25,8 +25,8 @@ class SVG
               xmlns: 'http://www.w3.org/2000/svg',
               'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
               x: 0, y: 0,
-              width: @properties[:width], height: @properties[:height],
-              viewBox: "0, 0, #{@properties[:width]}, #{@properties[:height]}") {
+              width: @properties['canvas_size_x'], height: @properties['canvas_size_y'],
+              viewBox: "0, 0, #{@properties['canvas_size_x']}, #{@properties['canvas_size_y']}") {
         xml.marker(id: 'arrow-end',
                    markerWidth: 8, markerHeight: 8,
                    refX: '2%', refY: 4,
@@ -44,11 +44,12 @@ class SVG
           xml << "Рисование: #{@properties[:g01]}мм. Холостой ход: #{@properties[:g00]}мм."
         }
 
-        xml.rect(x: 2, y: 2, width: @properties[:width]-2, height: @properties[:height]-2, stroke: 'grey')
+        xml.rect(x: 2, y: 2, width: @properties['canvas_size_x']-2, height: @properties['canvas_size_y']-2, stroke: 'grey')
+        xml.rect(x: @properties['move_x'], y: @properties['move_y'], width: @properties[:width]+2, height: @properties[:height]+2, stroke: 'grey')
         xml.rect(x: @properties['crop_x'] + @properties['move_x'],
                  y: @properties['crop_y'] + @properties['move_y'],
-                 width: @properties['crop_w'] + @properties['move_x'],
-                 height: @properties['crop_h'] + @properties['move_y'], stroke: 'grey')
+                 width: @properties['crop_w'],
+                 height: @properties['crop_h'], stroke: 'grey')
         radius = @properties[:width].to_f/100
         radius = 25 if radius > 25
         radius = 5 if radius < 5
@@ -56,7 +57,10 @@ class SVG
 
         #first move_to line
         finish = paths.first.directions.first.finish
-        xml.path(id: "move_0", d: "M #{@start_point.x},#{@start_point.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
+        d_start = @start_point.d_transform(@properties['canvas_size_x'])
+        xml.circle(cx: d_start.x, cy: d_start.y, r: radius, fill: 'green' )
+
+        xml.path(id: "move_0", d: "M #{d_start.x},#{d_start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
 
         #main
         paths.each_index do |i|
@@ -73,7 +77,7 @@ class SVG
 
         #last move_to line
         start = paths.last.directions.last.finish
-        finish = @start_point
+        finish = d_start
         xml.path(id: "move_#{paths.size}", d: "M #{start.x},#{start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
       }
     end
@@ -273,7 +277,6 @@ class SVG
         direction.finish.x += dx
         direction.finish.y += dy
       end
-      # @splitted_paths[i].organize!
     end
   end
 
