@@ -39,7 +39,7 @@ def split_for_spray(file_name, properties_file_name = 'properties.yml')
   svg_file.read_properties properties_file_name
   svg_file.read_svg file_name
 
-  svg_file.optimize
+  # svg_file.optimize
   svg_file.split
   svg_file.crop
   svg_file.move

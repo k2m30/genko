@@ -201,7 +201,7 @@ class SVG
   end
 
   def optimize
-    point = @start_point
+    point = @start_point.d_transform @properties['canvas_size_x']
     optimized_paths = []
 
     until @paths.empty? do
