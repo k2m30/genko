@@ -4,8 +4,8 @@ require_relative 'path/path'
 require_relative '../gcode'
 
 class SVG
-  attr_accessor :paths, :splitted_paths, :tpaths
-  attr_reader :width, :height, :properties, :start_point
+  attr_accessor :paths, :splitted_paths, :tpaths, :properties
+  attr_reader :width, :height, :start_point
 
   def initialize #(file_name, properties_file_name = 'properties.yml')
     @splitted_paths = []
@@ -42,24 +42,25 @@ class SVG
         xml.style 'text {font-family: Verdana; font-size: 16;}'
 
         xml.text_(x: '25', y: '15') {
-          xml << "Рисование: #{@properties[:g01]}мм. Холостой ход: #{@properties[:g00]}мм."
+          xml << "Рисование: #{@properties['g01']}мм. Холостой ход: #{@properties['g00']}мм."
         }
 
         xml.rect(x: 2, y: 2, width: @properties['canvas_size_x']-2, height: @properties['canvas_size_y']-2, stroke: 'grey')
-        xml.rect(x: @properties['move_x'], y: @properties['move_y'], width: @properties[:width]+2, height: @properties[:height]+2, stroke: 'grey')
+        xml.rect(x: @properties['move_x'], y: @properties['move_y'], width: @properties['width']+2, height: @properties['height']+2, stroke: 'grey')
         xml.rect(x: @properties['crop_x'] + @properties['move_x'],
                  y: @properties['crop_y'] + @properties['move_y'],
                  width: @properties['crop_w'],
                  height: @properties['crop_h'], stroke: 'grey')
-        radius = @properties[:width].to_f/100
+        radius = @properties['width'].to_f/100
         radius = 25 if radius > 25
         radius = 5 if radius < 5
-        xml.circle(cx: @properties['move_x'], cy: @properties['move_y'], r: radius, fill: 'green' )
+        xml.circle(cx: @properties['move_x'], cy: @properties['move_y'], r: radius, fill: 'green')
 
         #first move_to line
         finish = paths.first.directions.first.finish
+        @start_point ||= Point.new @properties['initial_x'], @properties['initial_y']
         d_start = @start_point.to_decart(@properties['canvas_size_x'])
-        xml.circle(cx: d_start.x, cy: d_start.y, r: radius, fill: 'green' )
+        xml.circle(cx: d_start.x, cy: d_start.y, r: radius, fill: 'green')
 
         xml.path(id: "move_0", d: "M #{d_start.x},#{d_start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
 
@@ -221,8 +222,8 @@ class SVG
     end
 
     g00 += length @splitted_paths.last.directions.last.finish, @start_point
-    @properties[:g00] = g00
-    @properties[:g01] = g01
+    @properties['g00'] = g00
+    @properties['g01'] = g01
   end
 
   def move

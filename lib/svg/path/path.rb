@@ -25,8 +25,7 @@ class Path
       z: ClosePath
   }
 
-  def initialize(d='')
-    @d = d
+  def initialize
     @directions = []
   end
 

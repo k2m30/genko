@@ -1,10 +1,55 @@
+require_relative 'svg/path/directions/point'
+require_relative 'svg/svg'
+
 class GCode
   def initialize(file_name)
     @file_name = file_name
   end
 
   def to_svg
+    read_properties
+    svg = SVG.new
+    svg.properties = @properties
+    paths = []
+    path = nil
+    File.open @file_name, 'r' do |f|
+      f.readlines.each do |line|
+        xy = line.match /G0([01]) X(-?\d+.\d*) Y(-?\d+.\d*)/
+        if xy.nil?
+        else
+          point = Point.new(xy[2].to_f + @properties['initial_x'].to_f, xy[3].to_f + @properties['initial_y'].to_f)
+          decart_point = point.to_decart(@properties['canvas_size_x'].to_f)
+          case xy[1].to_i
+            when 0
+              unless path.nil?
+                path.organize!
+                paths.push path
+              end
+              path = Path.new
+              path.directions.push MoveTo.new 'M', [decart_point.x, decart_point.y]
+            when 1
+              path.directions.push LineTo.new 'L', [decart_point.x, decart_point.y]
+          end
+        end
+      end
+      svg.dump(@file_name+'.check.svg', paths)
+    end
+  end
 
+  def read_properties
+    @properties = Hash.new
+    File.open @file_name, 'r' do |f|
+      f.readlines.each do |line|
+        break if line == '%'
+        pair = line.match /\(\["(.*)",(.*)\]\)/
+        next if pair.nil?
+        begin
+          @properties[pair[1]] = pair[2].to_f
+        rescue
+          @properties[pair[1]] = pair[2]
+        end
+      end
+    end
   end
 
   def save(paths, properties)

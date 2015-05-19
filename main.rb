@@ -75,8 +75,8 @@ color_files.each_with_index do |tmp_name, i|
   names.each do |name|
     svg_file = SVG.new
     svg_file.read_properties properties_file_name
-    svg_file.properties[:width] = @width
-    svg_file.properties[:height] = @height
+    svg_file.properties['width'] = @width
+    svg_file.properties['height'] = @height
     svg_file.read_svg name
 
     next if svg_file.paths.empty?
@@ -89,6 +89,9 @@ color_files.each_with_index do |tmp_name, i|
     svg_file.save_html("#{new_name}_splitted")
     svg_file.save("#{new_name}_result.svg", svg_file.tpaths)
     svg_file.save_gcode("#{new_name}.gcode", svg_file.tpaths)
+
+    g = GCode.new "#{new_name}.gcode"
+    g.to_svg
   end
   tmp_files_splitted += names
 end
