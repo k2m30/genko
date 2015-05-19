@@ -1,16 +1,16 @@
 class GCode
-  def initialize
-
+  def initialize(file_name)
+    @file_name = file_name
   end
 
   def to_svg
 
   end
 
-  def save(file_name, paths, properties)
+  def save(paths, properties)
     begin
-      f = File.new file_name, 'w+'
-      f.puts "(#{file_name})"
+      f = File.new @file_name, 'w+'
+      f.puts "(#{@file_name})"
       f.puts "(#{Time.now.strftime('%d-%b-%y %H:%M:%S').to_s})"
       properties.each_pair { |pair| f.puts "(#{pair})" }
       f.puts '%'
@@ -45,6 +45,6 @@ class GCode
       p e.message
       p e.backtrace[0..5].join
     end
-    print "Saved to #{file_name}\n"
+    print "Saved to #{@file_name}\n"
   end
 end

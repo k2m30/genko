@@ -161,8 +161,8 @@ class SVG
   end
 
   def save_gcode(file_name, paths)
-    gcode_file = GCode.new
-    gcode_file.save(file_name, paths, @properties)
+    gcode_file = GCode.new file_name
+    gcode_file.save paths, @properties
   end
 
   def optimize
