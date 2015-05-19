@@ -88,7 +88,7 @@ color_files.each_with_index do |tmp_name, i|
     svg_file.save("#{new_name}_splitted.svg", svg_file.splitted_paths)
     svg_file.save_html("#{new_name}_splitted")
     svg_file.save("#{new_name}_result.svg", svg_file.tpaths)
-    svg_file.make_gcode_file("#{new_name}.gcode", svg_file.tpaths)
+    svg_file.save_gcode("#{new_name}.gcode", svg_file.tpaths)
   end
   tmp_files_splitted += names
 end

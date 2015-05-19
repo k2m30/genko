@@ -5,8 +5,8 @@ class TPath
     @tpath = Path.new
     path.directions.each do |direction|
       tdirection = direction.clone
-      tdirection.start = direction.start.t_transform width
-      tdirection.finish = direction.finish.t_transform width
+      tdirection.start = direction.start.to_triangle width
+      tdirection.finish = direction.finish.to_triangle width
       begin
         tdirection.rate = tdirection.length / direction.length
       rescue => e

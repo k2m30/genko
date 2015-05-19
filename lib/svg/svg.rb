@@ -1,6 +1,7 @@
 require 'nokogiri'
 require 'yaml'
 require_relative 'path/path'
+require_relative '../gcode'
 
 class SVG
   attr_accessor :paths, :splitted_paths, :tpaths
@@ -57,7 +58,7 @@ class SVG
 
         #first move_to line
         finish = paths.first.directions.first.finish
-        d_start = @start_point.d_transform(@properties['canvas_size_x'])
+        d_start = @start_point.to_decart(@properties['canvas_size_x'])
         xml.circle(cx: d_start.x, cy: d_start.y, r: radius, fill: 'green' )
 
         xml.path(id: "move_0", d: "M #{d_start.x},#{d_start.y} L #{finish.x}, #{finish.y} ", class: 'move_to')
@@ -159,49 +160,13 @@ class SVG
     paths
   end
 
-  def make_gcode_file(file_name, paths)
-    begin
-      f = File.new file_name, 'w+'
-      f.puts "(#{file_name})"
-      f.puts "(#{Time.now.strftime('%d-%b-%y %H:%M:%S').to_s})"
-      @properties.each_pair { |pair| f.puts "(#{pair})" }
-      f.puts '%'
-      #f.puts 'G51Y-1'
-      initial_x = @start_point.x
-      initial_y = @start_point.y
-
-      paths.each do |path|
-        f.puts
-        f.puts "(#{path.length} #{path.d})"
-        path.directions.each do |direction|
-          x = (direction.finish.x - initial_x).round(2)
-          y = (direction.finish.y - initial_y).round(2)
-          case direction.command_code
-            when 'M'
-              f.puts 'G00 Z0'
-              f.puts "G00 X#{x} Y#{y} Z0"
-            when 'L'
-              feed = (@properties['linear_velocity'] * direction.rate).round(2)
-              f.puts "G01 X#{x} Y#{y} Z#{@properties['z_turn']} F#{feed}"
-            else
-              raise ArgumentError "Bad command in tpath #{direction.command_code}"
-          end
-        end
-      end
-      f.puts 'G00 Z0'
-      f.puts 'G00 X0 Y0 Z0'
-      f.puts 'M30'
-      f.close
-
-    rescue Exception => e
-      p e.message
-      p e.backtrace[0..5].join
-    end
-    print "Saved to #{file_name}\n"
+  def save_gcode(file_name, paths)
+    gcode_file = GCode.new
+    gcode_file.save(file_name, paths, @properties)
   end
 
   def optimize
-    point = @start_point.d_transform @properties['canvas_size_x']
+    point = @start_point.to_decart @properties['canvas_size_x']
     optimized_paths = []
 
     until @paths.empty? do

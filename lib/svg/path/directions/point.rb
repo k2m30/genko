@@ -10,7 +10,7 @@ class Point
     [x, y].to_s
   end
 
-  def t_transform(width)
+  def to_triangle(width)
     x = self.x
     y = self.y
     lx = Math.sqrt(x*x + y*y)
@@ -22,7 +22,7 @@ class Point
     Point.new lx.round(2), ly.round(2)
   end
 
-  def d_transform(width)
+  def to_decart(width)
     lx = self.x
     ly = self.y
 
