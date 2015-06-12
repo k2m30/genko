@@ -1,5 +1,9 @@
 require 'sinatra'
 
+configure do
+
+end
+
 get '/hi' do
   "Hello World!"
 end
