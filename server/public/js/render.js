@@ -41,8 +41,8 @@ window.onload = function() {
     viewer.setScene(scene).fit();
     rotate(-1.5,0.2, 0);
 
-    var timer = setInterval(getAngles, 100);
+    //var timer = setInterval(getAngles, 100);
     document.getElementById('canvas').onclick = function(){
-        clearInterval(timer);
+        //clearInterval(timer);
     }
-}
+};
