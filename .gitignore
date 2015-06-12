@@ -1,4 +1,4 @@
 /.idea
 /UniversalGcodeSender
-/result
-/html/*.html
+/svg/result
+/svg/html/*.html

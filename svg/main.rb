@@ -59,14 +59,14 @@ end
 # file_name = ARGV[0] || Dir.pwd + '/images/Domik.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/fill.svg'
 # file_name = ARGV[0] || Dir.pwd + '/images/yellow.svg'
-file_name = ARGV[0] || Dir.pwd + '/images/risovaka007_003.svg'
+file_name = ARGV[0] || './svg/images/risovaka007_003.svg'
 color_files = split_colors(file_name)
 
 p color_files
 
-Dir.mkdir('result') unless Dir.exists?('result')
+Dir.mkdir('svg/result') unless Dir.exists?('svg/result')
 
-properties_file_name = 'properties.yml'
+properties_file_name = './svg/properties.yml'
 tmp_files_splitted = []
 
 color_files.each_with_index do |tmp_name, i|
@@ -84,7 +84,7 @@ color_files.each_with_index do |tmp_name, i|
     svg_file.calculate_length
     svg_file.make_tpath
 
-    new_name = "./result/0#{i.next}_#{name.gsub('.svg', '')}"
+    new_name = "./svg/result/0#{i.next}_#{name.gsub('.svg', '')}"
     svg_file.save("#{new_name}_splitted.svg", svg_file.splitted_paths)
     svg_file.save_html("#{new_name}_splitted")
     svg_file.save("#{new_name}_result.svg", svg_file.tpaths)

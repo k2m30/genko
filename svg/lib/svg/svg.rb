@@ -118,15 +118,15 @@ class SVG
   end
 
   def save_html(file_name)
-    file_name.sub!('./result/', '')
+    file_name.sub!('result', 'html')
     builder = Nokogiri::HTML::Builder.new do |doc|
       doc.html {
         doc.head(lang: 'en') {
           doc.meta(charset: 'utf-8')
-          doc.script(src: 'paint.js')
+          doc.script(src: 'js/paint.js')
         }
         doc.body {
-          doc.object(data: "../result/#{file_name}.svg", type: 'image/svg+xml', id: 'result')
+          doc.object(data: "../result/#{file_name.sub('./svg/html/', '')}.svg", type: 'image/svg+xml', id: 'result')
           doc.div(style: 'margin: 20px 40% 20px 40%;') {
             doc.button(style: 'width: 100%; height: 60px;', autofocus: 'true', onclick: "paint('result')") {
               doc << 'Paint'
@@ -136,8 +136,9 @@ class SVG
       }
     end
 
-    File.open("./html/#{file_name}.html", 'w') { |f| f.write builder.to_html }
-    print "Saved to ./html/#{file_name}.html\n"
+
+    File.open(file_name + '.html', 'w') { |f| f.write builder.to_html }
+    print "Saved to #{file_name}.html\n"
   end
 
 # @return [it splits path into several separate paths according to properties['max_spray_length'] value.
