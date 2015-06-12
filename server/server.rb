@@ -33,7 +33,8 @@ get '/settings' do
 end
 
 get '/sensors' do
-
+  response['Access-Control-Allow-Origin'] = '*'
+  settings.rotation.measure.to_s + ' ' + settings.distance.measure(17, 27).to_s
 end
 
 get '/move' do

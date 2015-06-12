@@ -5,9 +5,20 @@
       %title
       %script{:charset => "utf-8", :src => "js/raphael.js", :type => "text/javascript"}
       %script{:charset => "utf-8", :src => "js/raphael3d.src.js", :type => "text/javascript"}
+      %link{href: '/css/index.css', media: 'screen', rel: 'stylesheet'}
   %body
-    #rotation_x
-    #rotation_y
-    #distance{:style => "font-size: 48px;"}
-    #canvas
+    .main
+      #canvas
+      .buttons
+        .sensors
+          %span#rotation_x
+          %span#rotation_y
+          %span#distance{:style => "font-size: 48px;"}
+        %div
+          %button Load File
+        %div
+          %button Calibrate
+        %div
+          %button Run
+
     %script{:charset => "utf-8", :src => "js/render.js", :type => "text/javascript"}

@@ -1,10 +1,14 @@
 source 'http://rubygems.org'
 
 gem 'nokogiri'
-gem 'rspec'
 gem 'pry'
+
 gem 'sinatra'
-gem 'RubyInline'
+gem 'sinatra-contrib'
 gem 'thin'
+gem 'shotgun'
+
+gem 'RubyInline'
+
 gem 'haml'
 gem 'haml-contrib'

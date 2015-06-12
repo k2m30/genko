@@ -11,7 +11,7 @@ function rotate(x, y, z){
 
 function getAngles(){
     var r = new XMLHttpRequest();
-    r.open('get','http://192.168.100.39:4567', true);
+    r.open('get','/sensors', true);
     r.send();
     r.onreadystatechange = function(){
         if (r.readyState != 4 || r.status != 200) return;
@@ -41,8 +41,8 @@ window.onload = function() {
     viewer.setScene(scene).fit();
     rotate(-1.5,0.2, 0);
 
-    //var timer = setInterval(getAngles, 100);
+    var timer = setInterval(getAngles, 2000);
     document.getElementById('canvas').onclick = function(){
-        //clearInterval(timer);
+        clearInterval(timer);
     }
 };

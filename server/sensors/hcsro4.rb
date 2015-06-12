@@ -57,6 +57,8 @@ class HCSRO4
   '
     end
   else
-    24.2
+    def measure(trig, echo)
+      24.3
+    end
   end
 end
