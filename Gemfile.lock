@@ -1,6 +1,9 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    RubyInline (3.12.4)
+      ZenTest (~> 4.3)
+    ZenTest (4.11.0)
     coderay (1.1.0)
     diff-lcs (1.2.5)
     method_source (0.8.2)
@@ -37,6 +40,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  RubyInline
   nokogiri
   pry
   rspec
